@@ -1555,9 +1555,9 @@ public class LatinIME extends InputMethodService implements
     // todo: see also the comment for clearNavigationBarColor
     private void setNavigationBarColor() {
         final SettingsValues settingsValues = mSettings.getCurrent();
-        if (!settingsValues.mCustomNavBarColor)
+        if (!settingsValues.mCustomNavBarColor && !settingsValues.mBlackNavBar)
             return;
-        final int color = settingsValues.mColors.get(ColorType.NAVIGATION_BAR);
+        final int color = settingsValues.mBlackNavBar ? 0xFF000000 : settingsValues.mColors.get(ColorType.NAVIGATION_BAR);
         final Window window = getWindow().getWindow();
         if (window == null)
             return;
@@ -1580,7 +1580,7 @@ public class LatinIME extends InputMethodService implements
     //  plus it needs someone with a new enough OS
     private void clearNavigationBarColor() {
         final SettingsValues settingsValues = mSettings.getCurrent();
-        if (!settingsValues.mCustomNavBarColor)
+        if (!settingsValues.mCustomNavBarColor && !settingsValues.mBlackNavBar)
             return;
         final Window window = getWindow().getWindow();
         if (window == null) {

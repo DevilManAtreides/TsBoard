@@ -727,6 +727,9 @@ New dictionary:
     <string name="day_night_mode_summary">Appearance will follow system settings</string>
     <!-- Option for setting navbar to follow keyboard color -->
     <string name="theme_navbar">Color navigation bar</string>
+    <!-- Setting to make the system navigation bar below the keyboard pure black -->
+    <string name="theme_navbar_black">Black navigation bar</string>
+    <string name="theme_navbar_black_summary">Pure black (OLED) bar below the keyboard. Overrides the color above.</string>
     <!-- Theme name for light theme -->
     <string name="theme_name_light" tools:keep="@string/theme_name_light">Light</string>
     <!-- Theme name for holo white theme -->
