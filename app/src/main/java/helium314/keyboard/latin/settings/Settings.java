@@ -61,6 +61,8 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
     public static final String PREF_THEME_COLORS = "theme_colors";
     public static final String PREF_THEME_COLORS_NIGHT = "theme_colors_night";
     public static final String PREF_THEME_KEY_BORDERS = "theme_key_borders";
+    public static final String PREF_KEY_OUTLINE_WIDTH = "key_outline_width";
+    public static final String PREF_KEY_OUTLINE_COLOR = "key_outline_color";
     public static final String PREF_THEME_DAY_NIGHT = "theme_auto_day_night";
     public static final String PREF_BACKGROUND_BLUR = "background_blur";
     public static final String PREF_BACKGROUND_DIM = "background_dim";

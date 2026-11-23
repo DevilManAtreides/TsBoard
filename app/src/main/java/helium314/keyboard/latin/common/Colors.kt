@@ -95,7 +95,30 @@ interface Colors {
             }
             else -> {}
         }
-        return drawable
+        return outlined(drawable, color)
+    }
+
+    /** Draws the key outline from Appearance settings on top of [drawable]. Only for the keys on the
+     *  keyboard itself (not popups or suggestions), and only if key borders are on. */
+    private fun outlined(drawable: Drawable, color: ColorType): Drawable {
+        if (!hasKeyBorders || themeStyle == STYLE_HOLO) return drawable
+        if (color != KEY_BACKGROUND && color != FUNCTIONAL_KEY_BACKGROUND
+            && color != SPACE_BAR_BACKGROUND && color != ACTION_KEY_BACKGROUND) return drawable
+        val context = Settings.getCurrentContext()
+        val prefs = context.prefs()
+        val halfDp = prefs.getInt(Settings.PREF_KEY_OUTLINE_WIDTH, Defaults.PREF_KEY_OUTLINE_WIDTH)
+        if (halfDp <= 0) return drawable
+        val density = context.resources.displayMetrics.density
+        val outline = GradientDrawable().apply {
+            shape = GradientDrawable.RECTANGLE
+            // larger than the key is fine, it is limited to a half circle; matches the shapes in res/drawable
+            cornerRadius = (if (themeStyle == STYLE_MATERIAL) 5f else 10f) * density *
+                (if (color == FUNCTIONAL_KEY_BACKGROUND && themeStyle != STYLE_MATERIAL) 50f else 1f)
+            setColor(Color.TRANSPARENT)
+            setStroke(maxOf(1, Math.round(halfDp * 0.5f * density)),
+                prefs.getInt(Settings.PREF_KEY_OUTLINE_COLOR, Defaults.PREF_KEY_OUTLINE_COLOR))
+        }
+        return android.graphics.drawable.LayerDrawable(arrayOf(drawable, outline))
     }
 }
 

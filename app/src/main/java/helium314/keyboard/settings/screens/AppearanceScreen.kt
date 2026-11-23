@@ -33,6 +33,7 @@ import helium314.keyboard.settings.SettingsActivity
 import helium314.keyboard.settings.preferences.SliderPreference
 import helium314.keyboard.settings.preferences.SwitchPreference
 import helium314.keyboard.latin.utils.Theme
+import helium314.keyboard.settings.dialogs.ColorPickerDialog
 import helium314.keyboard.settings.dialogs.ColorThemePickerDialog
 import helium314.keyboard.settings.dialogs.CustomizeIconsDialog
 import helium314.keyboard.settings.initPreview
@@ -63,6 +64,8 @@ fun AppearanceScreen(
         Settings.PREF_ACCENT_SHIFTED_ICON,
         Settings.PREF_CUSTOM_ICON_NAMES,
         Settings.PREF_THEME_KEY_BORDERS,
+        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)) Settings.PREF_KEY_OUTLINE_WIDTH else null,
+        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)) Settings.PREF_KEY_OUTLINE_COLOR else null,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
             Settings.PREF_THEME_DAY_NIGHT else null,
         Settings.PREF_THEME_COLORS,
@@ -200,6 +203,35 @@ fun createAppearanceSettings(context: Context) = listOf(
     },
     Setting(context, Settings.PREF_THEME_KEY_BORDERS, R.string.key_borders) {
         SwitchPreference(it, Defaults.PREF_THEME_KEY_BORDERS) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
+    },
+    Setting(context, Settings.PREF_KEY_OUTLINE_WIDTH, R.string.key_outline_width, R.string.key_outline_width_summary) { setting ->
+        SliderPreference(
+            name = setting.title,
+            key = setting.key,
+            default = Defaults.PREF_KEY_OUTLINE_WIDTH,
+            description = { if (it == 0) "-" else "${it / 2f} dp" },
+            range = 0f..8f,
+            stepSize = 1,
+        ) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
+    },
+    Setting(context, Settings.PREF_KEY_OUTLINE_COLOR, R.string.key_outline_color) { setting ->
+        val prefs = LocalContext.current.prefs()
+        var show by rememberSaveable { mutableStateOf(false) }
+        Preference(name = setting.title, onClick = { show = true })
+        if (show)
+            ColorPickerDialog(
+                onDismissRequest = { show = false },
+                initialColor = prefs.getInt(Settings.PREF_KEY_OUTLINE_COLOR, Defaults.PREF_KEY_OUTLINE_COLOR),
+                title = setting.title,
+                showDefault = prefs.contains(Settings.PREF_KEY_OUTLINE_COLOR),
+                onDefault = {
+                    prefs.edit { remove(Settings.PREF_KEY_OUTLINE_COLOR) }
+                    KeyboardSwitcher.getInstance().setThemeNeedsReload()
+                },
+            ) { color ->
+                prefs.edit { putInt(Settings.PREF_KEY_OUTLINE_COLOR, color) }
+                KeyboardSwitcher.getInstance().setThemeNeedsReload()
+            }
     },
     Setting(context, Settings.PREF_THEME_DAY_NIGHT, R.string.day_night_mode, R.string.day_night_mode_summary) {
         SwitchPreference(it, Defaults.PREF_THEME_DAY_NIGHT) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }

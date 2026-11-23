@@ -719,6 +719,10 @@ New dictionary:
     <string name="theme_colors_night">Colors (night)</string>
     <!-- Option for choosing whether we use a theme that provides borders to keys -->
     <string name="key_borders">Key borders</string>
+    <!-- Outline drawn around each key when key borders are on -->
+    <string name="key_outline_width">Key outline thickness</string>
+    <string name="key_outline_width_summary">Draws a thin line around each key. Needs key borders.</string>
+    <string name="key_outline_color">Key outline color</string>
     <!-- Option for choosing whether the shift icon should be accent-colored in shift and caps lock modes -->
     <string name="accent_shifted_icon">Accented shift icon</string>
     <!-- Option for choosing auto day/night theme switch -->

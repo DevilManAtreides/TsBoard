@@ -53,6 +53,9 @@ object Defaults {
     const val PREF_BACKGROUND_BLUR = 0
     const val PREF_BACKGROUND_DIM = 0
     const val PREF_BACKGROUND_KEY_OPACITY = 100
+    /** in steps of 0.5 dp, 0 = no outline */
+    const val PREF_KEY_OUTLINE_WIDTH = 0
+    const val PREF_KEY_OUTLINE_COLOR = 0x99FFFFFF.toInt()
     @JvmField
     val PREF_THEME_DAY_NIGHT = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
     const val PREF_CUSTOM_ICON_NAMES = ""
