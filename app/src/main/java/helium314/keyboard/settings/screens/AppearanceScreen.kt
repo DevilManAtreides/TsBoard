@@ -19,6 +19,7 @@ import helium314.keyboard.keyboard.KeyboardSwitcher
 import helium314.keyboard.keyboard.KeyboardTheme
 import helium314.keyboard.keyboard.internal.KeyboardIconsSet
 import helium314.keyboard.latin.R
+import helium314.keyboard.latin.common.KeyFace
 import helium314.keyboard.latin.settings.Defaults
 import helium314.keyboard.latin.utils.Log
 import helium314.keyboard.latin.utils.getActivity
@@ -66,6 +67,9 @@ fun AppearanceScreen(
         Settings.PREF_THEME_KEY_BORDERS,
         if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)) Settings.PREF_KEY_OUTLINE_WIDTH else null,
         if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)) Settings.PREF_KEY_OUTLINE_COLOR else null,
+        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)) Settings.PREF_KEY_STYLE else null,
+        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)
+            && prefs.getString(Settings.PREF_KEY_STYLE, Defaults.PREF_KEY_STYLE) != KeyFace.THEME) Settings.PREF_KEY_CORNER_RADIUS else null,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
             Settings.PREF_THEME_DAY_NIGHT else null,
         Settings.PREF_THEME_COLORS,
@@ -211,6 +215,31 @@ fun createAppearanceSettings(context: Context) = listOf(
             default = Defaults.PREF_KEY_OUTLINE_WIDTH,
             description = { if (it == 0) "-" else "${it / 2f} dp" },
             range = 0f..8f,
+            stepSize = 1,
+        ) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
+    },
+    Setting(context, Settings.PREF_KEY_STYLE, R.string.key_style) { setting ->
+        val ctx = LocalContext.current
+        val b = (ctx.getActivity() as? SettingsActivity)?.prefChanged?.collectAsState()
+        if ((b?.value ?: 0) < 0)
+            Log.v("irrelevant", "stupid way to trigger recomposition on preference change")
+        val items = listOf(
+            ctx.getString(R.string.key_style_theme) to KeyFace.THEME,
+            ctx.getString(R.string.key_style_flat) to KeyFace.FLAT,
+            ctx.getString(R.string.key_style_jelly) to KeyFace.JELLY,
+            ctx.getString(R.string.key_style_glass) to KeyFace.GLASS,
+        )
+        ListPreference(setting, items, Defaults.PREF_KEY_STYLE, { ctx.prefs().edit { remove(Settings.PREF_KEY_STYLE) } }) {
+            KeyboardSwitcher.getInstance().setThemeNeedsReload()
+        }
+    },
+    Setting(context, Settings.PREF_KEY_CORNER_RADIUS, R.string.key_corner_radius) { setting ->
+        SliderPreference(
+            name = setting.title,
+            key = setting.key,
+            default = Defaults.PREF_KEY_CORNER_RADIUS,
+            description = { if (it <= 0) "Square" else if (it >= KeyFace.PILL) "Pill" else "$it dp" },
+            range = 0f..KeyFace.PILL.toFloat(),
             stepSize = 1,
         ) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
     },

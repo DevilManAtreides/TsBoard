@@ -68,7 +68,7 @@ interface Colors {
 
     /** returns a colored drawable selected from [attr], which must contain using R.styleable.KeyboardView_* */
     fun selectAndColorDrawable(attr: TypedArray, color: ColorType): Drawable {
-        val drawable = when (color) {
+        val drawable = keyFace(color) ?: when (color) {
             KEY_BACKGROUND, MORE_SUGGESTIONS_WORD_BACKGROUND, ACTION_KEY_POPUP_KEYS_BACKGROUND, POPUP_KEYS_BACKGROUND ->
                 attr.getDrawable(R.styleable.KeyboardView_keyBackground)
             FUNCTIONAL_KEY_BACKGROUND -> attr.getDrawable(R.styleable.KeyboardView_functionalKeyBackground)
@@ -98,22 +98,38 @@ interface Colors {
         return outlined(drawable, color)
     }
 
+    /** A key face drawn in code if Settings > Appearance asks for one of the key styles, otherwise null.
+     *  Not used for popups or suggestions, and not without key borders (keys have no face then). */
+    private fun keyFace(color: ColorType): Drawable? {
+        if (!hasKeyBorders) return null
+        if (color != KEY_BACKGROUND && color != FUNCTIONAL_KEY_BACKGROUND
+            && color != SPACE_BAR_BACKGROUND && color != ACTION_KEY_BACKGROUND) return null
+        val context = Settings.getCurrentContext()
+        val prefs = context.prefs()
+        val style = KeyFace.style(prefs)
+        if (style == KeyFace.THEME) return null
+        val density = context.resources.displayMetrics.density
+        return KeyFaceDrawable(style, KeyFace.radiusPx(prefs, density), density)
+    }
+
     /** Draws the key outline from Appearance settings on top of [drawable]. Only for the keys on the
      *  keyboard itself (not popups or suggestions), and only if key borders are on. */
     private fun outlined(drawable: Drawable, color: ColorType): Drawable {
-        if (!hasKeyBorders || themeStyle == STYLE_HOLO) return drawable
-        if (color != KEY_BACKGROUND && color != FUNCTIONAL_KEY_BACKGROUND
-            && color != SPACE_BAR_BACKGROUND && color != ACTION_KEY_BACKGROUND) return drawable
         val context = Settings.getCurrentContext()
         val prefs = context.prefs()
+        val ownStyle = KeyFace.style(prefs) != KeyFace.THEME
+        if (!hasKeyBorders || (themeStyle == STYLE_HOLO && !ownStyle)) return drawable
+        if (color != KEY_BACKGROUND && color != FUNCTIONAL_KEY_BACKGROUND
+            && color != SPACE_BAR_BACKGROUND && color != ACTION_KEY_BACKGROUND) return drawable
         val halfDp = prefs.getInt(Settings.PREF_KEY_OUTLINE_WIDTH, Defaults.PREF_KEY_OUTLINE_WIDTH)
         if (halfDp <= 0) return drawable
         val density = context.resources.displayMetrics.density
         val outline = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             // larger than the key is fine, it is limited to a half circle; matches the shapes in res/drawable
-            cornerRadius = (if (themeStyle == STYLE_MATERIAL) 5f else 10f) * density *
-                (if (color == FUNCTIONAL_KEY_BACKGROUND && themeStyle != STYLE_MATERIAL) 50f else 1f)
+            cornerRadius = if (ownStyle) KeyFace.radiusPx(prefs, density)
+                else (if (themeStyle == STYLE_MATERIAL) 5f else 10f) * density *
+                    (if (color == FUNCTIONAL_KEY_BACKGROUND && themeStyle != STYLE_MATERIAL) 50f else 1f)
             setColor(Color.TRANSPARENT)
             setStroke(maxOf(1, Math.round(halfDp * 0.5f * density)),
                 prefs.getInt(Settings.PREF_KEY_OUTLINE_COLOR, Defaults.PREF_KEY_OUTLINE_COLOR))

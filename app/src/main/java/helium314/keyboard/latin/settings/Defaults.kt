@@ -56,6 +56,9 @@ object Defaults {
     /** in steps of 0.5 dp, 0 = no outline */
     const val PREF_KEY_OUTLINE_WIDTH = 0
     const val PREF_KEY_OUTLINE_COLOR = 0x99FFFFFF.toInt()
+    const val PREF_KEY_STYLE = "theme"
+    /** dp, 25 is fully round */
+    const val PREF_KEY_CORNER_RADIUS = 8
     @JvmField
     val PREF_THEME_DAY_NIGHT = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
     const val PREF_CUSTOM_ICON_NAMES = ""

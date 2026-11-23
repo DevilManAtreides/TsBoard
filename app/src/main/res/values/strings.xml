@@ -723,6 +723,13 @@ New dictionary:
     <string name="key_outline_width">Key outline thickness</string>
     <string name="key_outline_width_summary">Draws a thin line around each key. Needs key borders.</string>
     <string name="key_outline_color">Key outline color</string>
+    <!-- Key looks in Appearance, needs key borders -->
+    <string name="key_style">Key style</string>
+    <string name="key_style_theme">Theme default</string>
+    <string name="key_style_flat">Flat</string>
+    <string name="key_style_jelly">Jelly (domed, glossy)</string>
+    <string name="key_style_glass">Glass</string>
+    <string name="key_corner_radius">Key corner radius</string>
     <!-- Option for choosing whether the shift icon should be accent-colored in shift and caps lock modes -->
     <string name="accent_shifted_icon">Accented shift icon</string>
     <!-- Option for choosing auto day/night theme switch -->
