@@ -50,6 +50,9 @@ object Defaults {
     const val PREF_THEME_COLORS = KeyboardTheme.THEME_LIGHT
     const val PREF_THEME_COLORS_NIGHT = KeyboardTheme.THEME_DARK
     const val PREF_THEME_KEY_BORDERS = false
+    const val PREF_BACKGROUND_BLUR = 0
+    const val PREF_BACKGROUND_DIM = 0
+    const val PREF_BACKGROUND_KEY_OPACITY = 100
     @JvmField
     val PREF_THEME_DAY_NIGHT = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
     const val PREF_CUSTOM_ICON_NAMES = ""

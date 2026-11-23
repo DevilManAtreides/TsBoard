@@ -47,6 +47,9 @@ interface Colors {
     val accentShiftedIcon: Boolean get() =
         Settings.getCurrentContext().prefs().getBoolean(Settings.PREF_ACCENT_SHIFTED_ICON, Defaults.PREF_ACCENT_SHIFTED_ICON)
 
+    /** whether a custom background image is shown behind the keys, used for the key opacity setting */
+    val hasBackgroundImage: Boolean get() = false
+
     /** use to check whether colors have changed, for colors (in)directly derived from context,
      *  e.g. night mode or potentially changing system colors */
     fun haveColorsChanged(context: Context): Boolean = false
@@ -83,12 +86,23 @@ interface Colors {
         }?.mutate() ?: attr.getDrawable(R.styleable.KeyboardView_keyBackground)?.mutate()!! // keyBackground always exists
 
         setColor(drawable, color)
+        if (hasBackgroundImage) when (color) {
+            KEY_BACKGROUND, FUNCTIONAL_KEY_BACKGROUND, SPACE_BAR_BACKGROUND, ACTION_KEY_BACKGROUND -> {
+                // lets the (blurred) background image show through the keys
+                val percent = Settings.getCurrentContext().prefs()
+                    .getInt(Settings.PREF_BACKGROUND_KEY_OPACITY, Defaults.PREF_BACKGROUND_KEY_OPACITY)
+                drawable.alpha = (percent.coerceIn(0, 100) * 255 / 100)
+            }
+            else -> {}
+        }
         return drawable
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.S)
 class DynamicColors(context: Context, override val themeStyle: String, override val hasKeyBorders: Boolean, private var keyboardBackground: Drawable? = null) : Colors {
+
+    override val hasBackgroundImage: Boolean get() = keyboardBackground != null
 
     private val isNight = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
 
@@ -382,6 +396,8 @@ class DefaultColors (
     private val gesture: Int = accent,
     private var keyboardBackground: Drawable? = null,
 ) : Colors {
+    override val hasBackgroundImage: Boolean get() = keyboardBackground != null
+
     private val navBar: Int
     /** brightened or darkened variant of [background], to be used if exact background color would be
      *  bad contrast, e.g. popup keys popup or no border space bar */
@@ -564,6 +580,7 @@ class DefaultColors (
 
 class AllColors(private val colorMap: EnumMap<ColorType, Int>, override val themeStyle: String, override val hasKeyBorders: Boolean, backgroundImage: Drawable?) : Colors {
     private var keyboardBackground: Drawable? = backgroundImage
+    override val hasBackgroundImage: Boolean get() = keyboardBackground != null
     private val stateListMap = EnumMap<ColorType, ColorStateList>(ColorType::class.java)
     private var backgroundSetupDone = false
     private val colorFilters = hashMapOf<ColorType, ColorFilter>()

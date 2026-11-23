@@ -12,7 +12,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.ContextThemeWrapper;
@@ -30,6 +30,7 @@ import helium314.keyboard.latin.InputAttributes;
 import helium314.keyboard.latin.R;
 import helium314.keyboard.latin.RichInputMethodManager;
 import helium314.keyboard.latin.RichInputMethodSubtype;
+import helium314.keyboard.latin.common.BackgroundEffects;
 import helium314.keyboard.latin.common.StringUtils;
 import helium314.keyboard.latin.suggestions.PunctuationSuggestions;
 import helium314.keyboard.latin.utils.DeviceProtectedUtils;
@@ -61,6 +62,9 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
     public static final String PREF_THEME_COLORS_NIGHT = "theme_colors_night";
     public static final String PREF_THEME_KEY_BORDERS = "theme_key_borders";
     public static final String PREF_THEME_DAY_NIGHT = "theme_auto_day_night";
+    public static final String PREF_BACKGROUND_BLUR = "background_blur";
+    public static final String PREF_BACKGROUND_DIM = "background_dim";
+    public static final String PREF_BACKGROUND_KEY_OPACITY = "background_key_opacity";
     public static final String PREF_USER_COLORS_PREFIX = "user_colors_";
     public static final String PREF_USER_ALL_COLORS_PREFIX = "user_all_colors_";
     public static final String PREF_USER_MORE_COLORS_PREFIX = "user_more_colors_";
@@ -508,7 +512,12 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
             image = getCustomBackgroundFile(context, night, false); // fall back to portrait image for historic reasons
         if (!image.isFile()) return null;
         try {
-            sCachedBackgroundImages[index] = new BitmapDrawable(context.getResources(), BitmapFactory.decodeFile(image.getAbsolutePath()));
+            final SharedPreferences prefs = KtxKt.prefs(context);
+            final Bitmap bitmap = BackgroundEffects.load(image.getAbsolutePath(),
+                    prefs.getInt(PREF_BACKGROUND_BLUR, Defaults.PREF_BACKGROUND_BLUR),
+                    prefs.getInt(PREF_BACKGROUND_DIM, Defaults.PREF_BACKGROUND_DIM));
+            if (bitmap == null) return null;
+            sCachedBackgroundImages[index] = new BitmapDrawable(context.getResources(), bitmap);
             return sCachedBackgroundImages[index];
         } catch (Exception e) {
             return null;

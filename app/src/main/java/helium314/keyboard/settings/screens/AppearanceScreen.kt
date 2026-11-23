@@ -70,6 +70,9 @@ fun AppearanceScreen(
         Settings.PREF_NAVBAR_COLOR,
         SettingsWithoutKey.BACKGROUND_IMAGE,
         SettingsWithoutKey.BACKGROUND_IMAGE_LANDSCAPE,
+        Settings.PREF_BACKGROUND_BLUR,
+        Settings.PREF_BACKGROUND_DIM,
+        Settings.PREF_BACKGROUND_KEY_OPACITY,
         R.string.settings_category_miscellaneous,
         Settings.PREF_ENABLE_SPLIT_KEYBOARD,
         if (prefs.getBoolean(Settings.PREF_ENABLE_SPLIT_KEYBOARD_LANDSCAPE, Defaults.PREF_ENABLE_SPLIT_KEYBOARD)
@@ -210,6 +213,36 @@ fun createAppearanceSettings(context: Context) = listOf(
         R.string.customize_background_image_landscape, R.string.summary_customize_background_image_landscape)
     {
         BackgroundImagePref(it, true)
+    },
+    Setting(context, Settings.PREF_BACKGROUND_BLUR, R.string.background_blur, R.string.background_blur_summary) { setting ->
+        SliderPreference(
+            name = setting.title,
+            key = setting.key,
+            default = Defaults.PREF_BACKGROUND_BLUR,
+            description = { "$it %" },
+            range = 0f..100f,
+            stepSize = 5,
+        ) { reloadBackgroundImage() }
+    },
+    Setting(context, Settings.PREF_BACKGROUND_DIM, R.string.background_dim, R.string.background_dim_summary) { setting ->
+        SliderPreference(
+            name = setting.title,
+            key = setting.key,
+            default = Defaults.PREF_BACKGROUND_DIM,
+            description = { "$it %" },
+            range = 0f..80f,
+            stepSize = 5,
+        ) { reloadBackgroundImage() }
+    },
+    Setting(context, Settings.PREF_BACKGROUND_KEY_OPACITY, R.string.background_key_opacity, R.string.background_key_opacity_summary) { setting ->
+        SliderPreference(
+            name = setting.title,
+            key = setting.key,
+            default = Defaults.PREF_BACKGROUND_KEY_OPACITY,
+            description = { "$it %" },
+            range = 0f..100f,
+            stepSize = 5,
+        ) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
     },
     Setting(context, Settings.PREF_ENABLE_SPLIT_KEYBOARD, R.string.enable_split_keyboard) {
         var show by remember { mutableStateOf(false) }
@@ -364,4 +397,10 @@ private fun Preview() {
             AppearanceScreen { }
         }
     }
+}
+
+/** The processed background image is cached, so it has to be rebuilt when blur or dim change. */
+private fun reloadBackgroundImage() {
+    Settings.clearCachedBackgroundImages()
+    KeyboardSwitcher.getInstance().setThemeNeedsReload()
 }
