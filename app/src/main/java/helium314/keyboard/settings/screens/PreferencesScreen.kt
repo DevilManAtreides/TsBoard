@@ -13,6 +13,9 @@ import helium314.keyboard.keyboard.KeyboardLayoutSet
 import helium314.keyboard.keyboard.KeyboardSwitcher
 import helium314.keyboard.latin.AudioAndHapticFeedbackManager
 import helium314.keyboard.latin.R
+import helium314.keyboard.latin.common.CustomSounds
+import helium314.keyboard.settings.SettingsWithoutKey
+import helium314.keyboard.settings.preferences.CustomSoundPreference
 import helium314.keyboard.latin.database.ClipboardDao
 import helium314.keyboard.latin.settings.Defaults
 import helium314.keyboard.latin.settings.Settings
@@ -60,6 +63,10 @@ fun PreferencesScreen(
         Settings.PREF_SOUND_ON,
         if (prefs.getBoolean(Settings.PREF_SOUND_ON, Defaults.PREF_SOUND_ON))
             Settings.PREF_KEYPRESS_SOUND_VOLUME else null,
+        if (prefs.getBoolean(Settings.PREF_SOUND_ON, Defaults.PREF_SOUND_ON)) SettingsWithoutKey.CUSTOM_SOUND_KEY else null,
+        if (prefs.getBoolean(Settings.PREF_SOUND_ON, Defaults.PREF_SOUND_ON)) SettingsWithoutKey.CUSTOM_SOUND_SPACE else null,
+        if (prefs.getBoolean(Settings.PREF_SOUND_ON, Defaults.PREF_SOUND_ON)) SettingsWithoutKey.CUSTOM_SOUND_DELETE else null,
+        if (prefs.getBoolean(Settings.PREF_SOUND_ON, Defaults.PREF_SOUND_ON)) SettingsWithoutKey.CUSTOM_SOUND_ENTER else null,
         Settings.PREF_SAVE_SUBTYPE_PER_APP,
         Settings.PREF_SHOW_EMOJI_DESCRIPTIONS,
         R.string.settings_category_additional_keys,
@@ -124,6 +131,18 @@ fun createPreferencesSettings(context: Context) = listOf(
     },
     Setting(context, Settings.PREF_SOUND_ON, R.string.sound_on_keypress) {
         SwitchPreference(it, Defaults.PREF_SOUND_ON)
+    },
+    Setting(context, SettingsWithoutKey.CUSTOM_SOUND_KEY, R.string.custom_sound_key) {
+        CustomSoundPreference(it, CustomSounds.KEY)
+    },
+    Setting(context, SettingsWithoutKey.CUSTOM_SOUND_SPACE, R.string.custom_sound_space) {
+        CustomSoundPreference(it, CustomSounds.SPACE)
+    },
+    Setting(context, SettingsWithoutKey.CUSTOM_SOUND_DELETE, R.string.custom_sound_delete) {
+        CustomSoundPreference(it, CustomSounds.DELETE)
+    },
+    Setting(context, SettingsWithoutKey.CUSTOM_SOUND_ENTER, R.string.custom_sound_enter) {
+        CustomSoundPreference(it, CustomSounds.ENTER)
     },
     Setting(context, Settings.PREF_SHOW_EMOJI_DESCRIPTIONS, R.string.show_emoji_descriptions) {
         SwitchPreferenceWithEmojiDictWarning(it, Defaults.PREF_SHOW_EMOJI_DESCRIPTIONS)

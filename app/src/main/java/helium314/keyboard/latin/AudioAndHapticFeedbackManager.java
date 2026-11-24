@@ -15,6 +15,7 @@ import android.view.View;
 import helium314.keyboard.event.HapticEvent;
 import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode;
 import helium314.keyboard.latin.common.Constants;
+import helium314.keyboard.latin.common.CustomSounds;
 import helium314.keyboard.latin.settings.SettingsValues;
 
 /**
@@ -24,6 +25,7 @@ import helium314.keyboard.latin.settings.SettingsValues;
  * complexity of settings and the like.
  */
 public final class AudioAndHapticFeedbackManager {
+    private Context mContext;
     private AudioManager mAudioManager;
     private Vibrator mVibrator;
 
@@ -47,6 +49,7 @@ public final class AudioAndHapticFeedbackManager {
     }
 
     private void initInternal(final Context context) {
+        mContext = context.getApplicationContext();
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
     }
@@ -89,6 +92,16 @@ public final class AudioAndHapticFeedbackManager {
         if (hapticEvent != HapticEvent.KEY_PRESS) {
             return;
         }
+        final String customSlot = switch (code) {
+            case KeyCode.DELETE -> CustomSounds.DELETE;
+            case Constants.CODE_ENTER -> CustomSounds.ENTER;
+            case Constants.CODE_SPACE -> CustomSounds.SPACE;
+            default -> CustomSounds.KEY;
+        };
+        final float customVolume = mSettingsValues.mKeypressSoundVolume < 0 ? 0.7f : mSettingsValues.mKeypressSoundVolume;
+        if (CustomSounds.play(customSlot, customVolume)) {
+            return; // the user's own sound was played
+        }
         final int sound = switch (code) {
             case KeyCode.DELETE -> AudioManager.FX_KEYPRESS_DELETE;
             case Constants.CODE_ENTER -> AudioManager.FX_KEYPRESS_RETURN;
@@ -121,6 +134,7 @@ public final class AudioAndHapticFeedbackManager {
     public void onSettingsChanged(final SettingsValues settingsValues) {
         mSettingsValues = settingsValues;
         mSoundOn = reevaluateIfSoundIsOn();
+        if (mContext != null) CustomSounds.reloadIfNeeded(mContext);
     }
 
     public void onRingerModeChanged(boolean doNotDisturb) {

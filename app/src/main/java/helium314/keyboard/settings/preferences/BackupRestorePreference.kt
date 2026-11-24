@@ -19,6 +19,8 @@ import helium314.keyboard.dictionarypack.DictionaryPackConstants
 import helium314.keyboard.keyboard.KeyboardSwitcher
 import helium314.keyboard.keyboard.emoji.SupportedEmojis
 import helium314.keyboard.latin.R
+import helium314.keyboard.keyboard.KeyboardTypeface
+import helium314.keyboard.latin.common.CustomSounds
 import helium314.keyboard.latin.common.FileUtils
 import helium314.keyboard.latin.database.Database
 import helium314.keyboard.latin.settings.Settings
@@ -347,5 +349,185 @@ private val backupFilePatterns by lazy { listOf(
     "custom_background_image.*".toRegex(),
     "custom_font".toRegex(),
     "custom_emoji_font".toRegex(),
+    "custom_sounds${File.separator}.*".toRegex(),
     "clipboard/.*".toRegex(),
 ) }
+
+// ---- export / import of the look only: colors, key styles, animations, background, fonts, sounds ----
+
+private const val LOOK_PREFS_ENTRY = "look_preferences.json"
+private const val LOOK_FILES_PREFIX = "files/"
+
+private val lookKeys by lazy { setOf(
+    Settings.PREF_THEME_STYLE, Settings.PREF_ICON_STYLE, Settings.PREF_ACCENT_SHIFTED_ICON, Settings.PREF_CUSTOM_ICON_NAMES,
+    Settings.PREF_THEME_KEY_BORDERS, Settings.PREF_THEME_DAY_NIGHT, Settings.PREF_THEME_COLORS, Settings.PREF_THEME_COLORS_NIGHT,
+    Settings.PREF_NAVBAR_COLOR, Settings.PREF_NAVBAR_BLACK,
+    Settings.PREF_BACKGROUND_BLUR, Settings.PREF_BACKGROUND_DIM, Settings.PREF_BACKGROUND_KEY_OPACITY,
+    Settings.PREF_SPACE_BAR_TEXT, Settings.PREF_FONT_SCALE, Settings.PREF_HINT_FONT_SCALE,
+    Settings.PREF_EMOJI_FONT_SCALE, Settings.PREF_EMOJI_KEY_FIT,
+    Settings.PREF_KEY_OUTLINE_WIDTH, Settings.PREF_KEY_OUTLINE_COLOR, Settings.PREF_KEY_STYLE, Settings.PREF_KEY_EDGE,
+    Settings.PREF_KEY_CORNER_RADIUS, Settings.PREF_KEY_GLOW_SIZE, Settings.PREF_KEY_GLOW_COLOR,
+    Settings.PREF_KEY_PRESS_ANIM, Settings.PREF_KEY_ANIM_COLOR, Settings.PREF_KEY_ANIM_SIZE, Settings.PREF_KEY_ANIM_SPEED,
+    Settings.PREF_SOUND_ON, Settings.PREF_KEYPRESS_SOUND_VOLUME,
+) }
+
+private val lookKeyPrefixes by lazy { listOf(
+    Settings.PREF_USER_COLORS_PREFIX, Settings.PREF_USER_ALL_COLORS_PREFIX, Settings.PREF_USER_MORE_COLORS_PREFIX,
+    Settings.PREF_KEY_GAP_SCALE_PREFIX, Settings.PREF_KEYBOARD_HEIGHT_SCALE_PREFIX, Settings.PREF_BOTTOM_ROW_SCALE_PREFIX,
+    Settings.PREF_BOTTOM_PADDING_SCALE_PREFIX, Settings.PREF_SIDE_PADDING_SCALE_PREFIX, Settings.PREF_SPLIT_SPACER_SCALE_PREFIX,
+) }
+
+private val lookFilePatterns by lazy { listOf(
+    "custom_background_image.*".toRegex(),
+    "custom_font".toRegex(),
+    "custom_emoji_font".toRegex(),
+    "custom_sounds/.*".toRegex(),
+) }
+
+private fun isLookKey(key: String?) = key != null && (key in lookKeys || lookKeyPrefixes.any { key.startsWith(it) })
+
+/** Reads settings like [readJsonLinesToSettings], but only the ones that belong to the look. */
+private fun readLookJsonToSettings(list: List<String>, prefs: SharedPreferences): Boolean {
+    val i = list.iterator()
+    val e = prefs.edit()
+    try {
+        while (i.hasNext()) {
+            when (i.next()) {
+                "boolean settings" -> Json.decodeFromString<Map<String, Boolean>>(i.next()).filter { isLookKey(it.key) }.forEach { e.putBoolean(it.key, it.value) }
+                "int settings" -> Json.decodeFromString<Map<String, Int>>(i.next()).filter { isLookKey(it.key) }.forEach { e.putInt(it.key, it.value) }
+                "long settings" -> Json.decodeFromString<Map<String, Long>>(i.next()).filter { isLookKey(it.key) }.forEach { e.putLong(it.key, it.value) }
+                "float settings" -> Json.decodeFromString<Map<String, Float>>(i.next()).filter { isLookKey(it.key) }.forEach { e.putFloat(it.key, it.value) }
+                "string settings" -> Json.decodeFromString<Map<String, String>>(i.next()).filter { isLookKey(it.key) }.forEach { e.putString(it.key, it.value) }
+                "string set settings" -> Json.decodeFromString<Map<String, Set<String>>>(i.next()).filter { isLookKey(it.key) }.forEach { e.putStringSet(it.key, it.value) }
+            }
+        }
+        e.apply()
+        return true
+    } catch (e: Exception) {
+        return false
+    }
+}
+
+@Composable
+fun LookTransferPreference(setting: Setting) {
+    var showDialog by rememberSaveable { mutableStateOf(false) }
+    val ctx = LocalContext.current
+    var error: String? by rememberSaveable { mutableStateOf(null) }
+    val exportLauncher = lookExportLauncher { error = it }
+    val importLauncher = lookImportLauncher { error = it }
+    Preference(name = setting.title, onClick = { showDialog = true })
+    if (showDialog) {
+        ConfirmationDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(stringResource(R.string.look_transfer_title)) },
+            content = { Text(stringResource(R.string.look_transfer_message)) },
+            confirmButtonText = stringResource(R.string.button_export),
+            neutralButtonText = stringResource(R.string.button_import),
+            onNeutral = {
+                showDialog = false
+                val intent = IntentUtils.getResolvableTypeIntent(ctx, "application/zip")
+                    .setAction(Intent.ACTION_OPEN_DOCUMENT)
+                importLauncher.launch(intent)
+            },
+            onConfirmed = {
+                val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Calendar.getInstance().time)
+                val intent = IntentUtils.getResolvableTypeIntent(ctx, "application/zip")
+                    .setAction(Intent.ACTION_CREATE_DOCUMENT)
+                    .putExtra(Intent.EXTRA_TITLE, ctx.getString(R.string.english_ime_name).replace(" ", "_") + "_look_$currentDate.zip")
+                exportLauncher.launch(intent)
+            }
+        )
+    }
+    if (error != null) {
+        InfoDialog(
+            if (error!!.startsWith("e")) stringResource(R.string.look_export_error, error!!.drop(1))
+            else stringResource(R.string.look_import_error, error!!.drop(1))
+        ) { error = null }
+    }
+}
+
+@Composable
+private fun lookExportLauncher(onError: (String) -> Unit): ManagedActivityResultLauncher<Intent, ActivityResult> {
+    val ctx = LocalContext.current
+    return filePicker { uri ->
+        val filesDir = DeviceProtectedUtils.getFilesDir(ctx)
+        val basePath = filesDir.path + File.separator
+        val files = filesDir.walk().filter { it.isFile && lookFilePatterns.any { p -> it.path.replace(basePath, "").matches(p) } }.toList()
+        val lookPrefs = HashMap<String?, Any?>()
+        for ((key, value) in ctx.prefs().all) {
+            if (isLookKey(key)) lookPrefs[key] = value
+        }
+        val wait = CountDownLatch(1)
+        ExecutorUtils.getBackgroundExecutor(ExecutorUtils.KEYBOARD).execute {
+            try {
+                ctx.getActivity()?.contentResolver?.openOutputStream(uri)?.use { os ->
+                    val zip = ZipOutputStream(os)
+                    zip.putNextEntry(ZipEntry(LOOK_PREFS_ENTRY))
+                    settingsToJsonStream(lookPrefs, zip)
+                    zip.closeEntry()
+                    files.forEach {
+                        zip.putNextEntry(ZipEntry(LOOK_FILES_PREFIX + it.path.replace(basePath, "")))
+                        FileInputStream(it).buffered().use { input -> input.copyTo(zip, 1024) }
+                        zip.closeEntry()
+                    }
+                    zip.close()
+                }
+            } catch (t: Throwable) {
+                onError("e" + t.message)
+                Log.w("AdvancedScreen", "error during look export", t)
+            } finally {
+                wait.countDown()
+            }
+        }
+        wait.await()
+    }
+}
+
+@Composable
+private fun lookImportLauncher(onError: (String) -> Unit): ManagedActivityResultLauncher<Intent, ActivityResult> {
+    val ctx = LocalContext.current
+    return filePicker { uri ->
+        val wait = CountDownLatch(1)
+        ExecutorUtils.getBackgroundExecutor(ExecutorUtils.KEYBOARD).execute {
+            try {
+                var anyMatch = false
+                val filesDir = DeviceProtectedUtils.getFilesDir(ctx)
+                ctx.getActivity()?.contentResolver?.openInputStream(uri)?.use { inputStream ->
+                    ZipInputStream(inputStream).use { zip ->
+                        var entry: ZipEntry? = zip.nextEntry
+                        while (entry != null) {
+                            if (entry.name == LOOK_PREFS_ENTRY) {
+                                val lines = String(zip.readBytes()).split("\n")
+                                if (!readLookJsonToSettings(lines, ctx.prefs())) throw Exception("settings in the file are not readable")
+                                anyMatch = true
+                            } else if (entry.name.startsWith(LOOK_FILES_PREFIX)) {
+                                val name = entry.name.removePrefix(LOOK_FILES_PREFIX)
+                                if (lookFilePatterns.any { name.matches(it) }) {
+                                    if (!restoreEntryToDir(zip, filesDir, name))
+                                        Log.w("AdvancedScreen", "skipping unsafe entry $name")
+                                    anyMatch = true
+                                }
+                            }
+                            zip.closeEntry()
+                            entry = zip.nextEntry
+                        }
+                    }
+                }
+                if (!anyMatch) throw Exception("nothing to import in the given file")
+                if (Looper.myLooper() == null)
+                    Looper.prepare()
+                Toast.makeText(ctx, ctx.getString(R.string.look_imported), Toast.LENGTH_LONG).show()
+            } catch (t: Throwable) {
+                onError("i" + t.message)
+                Log.w("AdvancedScreen", "error during look import", t)
+            } finally {
+                wait.countDown()
+            }
+        }
+        wait.await()
+        CustomSounds.reloadIfNeeded(ctx)
+        KeyboardTypeface.clearCache()
+        (ctx.getActivity() as? SettingsActivity)?.prefChanged()
+        KeyboardSwitcher.getInstance().setThemeNeedsReload()
+    }
+}

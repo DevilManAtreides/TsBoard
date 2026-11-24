@@ -82,6 +82,11 @@ object SettingsWithoutKey {
     const val LOAD_GESTURE_LIB = "load_gesture_library"
     const val BACKGROUND_IMAGE = "background_image"
     const val BACKGROUND_IMAGE_LANDSCAPE = "background_image_landscape"
+    const val CUSTOM_SOUND_KEY = "custom_sound_key"
+    const val CUSTOM_SOUND_SPACE = "custom_sound_space"
+    const val CUSTOM_SOUND_DELETE = "custom_sound_delete"
+    const val CUSTOM_SOUND_ENTER = "custom_sound_enter"
+    const val LOOK_TRANSFER = "look_transfer"
     const val CUSTOM_FONT = "custom_font"
     const val CUSTOM_EMOJI_FONT = "custom_emoji_font"
 }
