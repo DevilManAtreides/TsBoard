@@ -57,6 +57,10 @@ object Defaults {
     const val PREF_KEY_OUTLINE_WIDTH = 0
     const val PREF_KEY_OUTLINE_COLOR = 0x99FFFFFF.toInt()
     const val PREF_KEY_STYLE = "theme"
+    const val PREF_KEY_EDGE = "outline"
+    /** dp */
+    const val PREF_KEY_GLOW_SIZE = 6
+    const val PREF_KEY_GLOW_COLOR = 0xB3FFFFFF.toInt()
     /** dp, 25 is fully round */
     const val PREF_KEY_CORNER_RADIUS = 8
     @JvmField

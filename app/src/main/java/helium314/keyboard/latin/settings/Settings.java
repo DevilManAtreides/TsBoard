@@ -64,6 +64,9 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
     public static final String PREF_KEY_OUTLINE_WIDTH = "key_outline_width";
     public static final String PREF_KEY_OUTLINE_COLOR = "key_outline_color";
     public static final String PREF_KEY_STYLE = "key_style";
+    public static final String PREF_KEY_EDGE = "key_edge";
+    public static final String PREF_KEY_GLOW_SIZE = "key_glow_size";
+    public static final String PREF_KEY_GLOW_COLOR = "key_glow_color";
     public static final String PREF_KEY_CORNER_RADIUS = "key_corner_radius";
     public static final String PREF_THEME_DAY_NIGHT = "theme_auto_day_night";
     public static final String PREF_BACKGROUND_BLUR = "background_blur";

@@ -724,6 +724,12 @@ New dictionary:
     <string name="key_outline_width_summary">Draws a thin line around each key. Needs key borders.</string>
     <string name="key_outline_color">Key outline color</string>
     <!-- Key looks in Appearance, needs key borders -->
+    <string name="key_edge">Key edge</string>
+    <string name="key_edge_outline">Outline</string>
+    <string name="key_edge_glow">Soft glow</string>
+    <string name="key_glow_size">Glow size</string>
+    <string name="key_glow_color">Glow color</string>
+    <string name="key_glow_color_summary">The opacity bar sets how bright the glow is</string>
     <string name="key_style">Key style</string>
     <string name="key_style_theme">Theme default</string>
     <string name="key_style_flat">Flat</string>

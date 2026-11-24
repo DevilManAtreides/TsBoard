@@ -1,18 +1,24 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package helium314.keyboard.latin.common
 
+import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.ColorFilter
+import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.PixelFormat
 import android.graphics.PorterDuff
 import android.graphics.Rect
+import android.graphics.RectF
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import helium314.keyboard.latin.settings.Defaults
 import helium314.keyboard.latin.settings.Settings
+import helium314.keyboard.latin.utils.prefs
+import kotlin.math.hypot
 
 /** Names and helpers for the key styles from Settings > Appearance. */
 object KeyFace {
@@ -31,6 +37,43 @@ object KeyFace {
     fun style(prefs: SharedPreferences): String {
         val style = prefs.getString(Settings.PREF_KEY_STYLE, Defaults.PREF_KEY_STYLE)
         return if (style == FLAT || style == JELLY || style == GLASS) style else THEME
+    }
+
+    const val EDGE_OUTLINE = "outline"
+    const val EDGE_GLOW = "glow"
+
+    @JvmStatic
+    fun edge(prefs: SharedPreferences): String =
+        if (prefs.getString(Settings.PREF_KEY_EDGE, Defaults.PREF_KEY_EDGE) == EDGE_GLOW) EDGE_GLOW else EDGE_OUTLINE
+
+    /** Corner radius of the keys in pixels if they use one of our own styles, otherwise 0. */
+    @JvmStatic
+    fun hintRadiusPx(context: Context, hasKeyBorders: Boolean): Float {
+        if (!hasKeyBorders) return 0f
+        val prefs = context.prefs()
+        if (style(prefs) == THEME) return 0f
+        return radiusPx(prefs, context.resources.displayMetrics.density)
+    }
+
+    /**
+     * Moves the center [xy] of a hint at the top right corner of a key inwards, along the curve, so the
+     * hint (half width [halfW], half height [halfH]) stays inside a rounded corner of [radius].
+     */
+    @JvmStatic
+    fun fitHint(xy: FloatArray, halfW: Float, halfH: Float, keyWidth: Int, keyHeight: Int, radius: Float) {
+        val r = minOf(radius, minOf(keyWidth, keyHeight) / 2f)
+        val cx = keyWidth - r
+        val cy = r
+        val dx = xy[0] - cx
+        val dy = xy[1] - cy
+        if (dx <= 0f || dy >= 0f) return // not in the corner part
+        val allowed = r - hypot(halfW, halfH) - 1f
+        if (allowed <= 0f) return // corner too small to matter
+        val distance = hypot(dx, dy)
+        if (distance <= allowed) return
+        val scale = allowed / distance
+        xy[0] = cx + dx * scale
+        xy[1] = cy + dy * scale
     }
 
     /** Corner radius in pixels; a radius larger than the key is limited to a half circle when drawn. */
@@ -138,4 +181,52 @@ class KeyFaceDrawable(private val style: String, private val radius: Float, dens
 
     @Deprecated("Deprecated in Java")
     override fun getOpacity() = PixelFormat.TRANSLUCENT
+}
+
+/**
+ * A soft glow along the inside of the key edge: several strokes of growing width, each faint, add up to
+ * a brightness that is highest at the edge and fades towards the middle of the key.
+ */
+class KeyGlowDrawable(private val radius: Float, private val color: Int, private val size: Float) : Drawable() {
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE }
+    private val clip = Path()
+    private val rect = RectF()
+    private var alphaValue = 255
+
+    override fun onBoundsChange(bounds: Rect) {
+        rect.set(bounds)
+        val r = minOf(radius, minOf(rect.width(), rect.height()) / 2f)
+        clip.reset()
+        clip.addRoundRect(rect, r, r, Path.Direction.CW)
+    }
+
+    override fun draw(canvas: Canvas) {
+        if (size <= 0f || rect.isEmpty) return
+        val r = minOf(radius, minOf(rect.width(), rect.height()) / 2f)
+        val baseAlpha = Color.alpha(color) * alphaValue / 255
+        paint.color = color
+        canvas.save()
+        canvas.clipPath(clip)
+        for (i in 1..STEPS) {
+            // the stroke is centered on the edge, so only its inner half is visible: that half is [size * i / STEPS] wide
+            paint.strokeWidth = 2f * size * i / STEPS
+            paint.alpha = maxOf(1, baseAlpha * 2 / (STEPS + 1))
+            canvas.drawRoundRect(rect, r, r, paint)
+        }
+        canvas.restore()
+    }
+
+    override fun setAlpha(alpha: Int) {
+        alphaValue = alpha
+        invalidateSelf()
+    }
+
+    override fun getAlpha() = alphaValue
+    override fun setColorFilter(colorFilter: ColorFilter?) {}
+    @Deprecated("Deprecated in Java")
+    override fun getOpacity() = PixelFormat.TRANSLUCENT
+
+    private companion object {
+        const val STEPS = 6
+    }
 }

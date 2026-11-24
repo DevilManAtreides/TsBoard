@@ -121,15 +121,22 @@ interface Colors {
         if (!hasKeyBorders || (themeStyle == STYLE_HOLO && !ownStyle)) return drawable
         if (color != KEY_BACKGROUND && color != FUNCTIONAL_KEY_BACKGROUND
             && color != SPACE_BAR_BACKGROUND && color != ACTION_KEY_BACKGROUND) return drawable
+        val density = context.resources.displayMetrics.density
+        // larger than the key is fine, it is limited to a half circle; matches the shapes in res/drawable
+        val corner = if (ownStyle) KeyFace.radiusPx(prefs, density)
+            else (if (themeStyle == STYLE_MATERIAL) 5f else 10f) * density *
+                (if (color == FUNCTIONAL_KEY_BACKGROUND && themeStyle != STYLE_MATERIAL) 50f else 1f)
+        if (KeyFace.edge(prefs) == KeyFace.EDGE_GLOW) {
+            val size = prefs.getInt(Settings.PREF_KEY_GLOW_SIZE, Defaults.PREF_KEY_GLOW_SIZE) * density
+            if (size <= 0f) return drawable
+            val glow = KeyGlowDrawable(corner, prefs.getInt(Settings.PREF_KEY_GLOW_COLOR, Defaults.PREF_KEY_GLOW_COLOR), size)
+            return android.graphics.drawable.LayerDrawable(arrayOf(drawable, glow))
+        }
         val halfDp = prefs.getInt(Settings.PREF_KEY_OUTLINE_WIDTH, Defaults.PREF_KEY_OUTLINE_WIDTH)
         if (halfDp <= 0) return drawable
-        val density = context.resources.displayMetrics.density
         val outline = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
-            // larger than the key is fine, it is limited to a half circle; matches the shapes in res/drawable
-            cornerRadius = if (ownStyle) KeyFace.radiusPx(prefs, density)
-                else (if (themeStyle == STYLE_MATERIAL) 5f else 10f) * density *
-                    (if (color == FUNCTIONAL_KEY_BACKGROUND && themeStyle != STYLE_MATERIAL) 50f else 1f)
+            cornerRadius = corner
             setColor(Color.TRANSPARENT)
             setStroke(maxOf(1, Math.round(halfDp * 0.5f * density)),
                 prefs.getInt(Settings.PREF_KEY_OUTLINE_COLOR, Defaults.PREF_KEY_OUTLINE_COLOR))

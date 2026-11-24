@@ -35,6 +35,7 @@ import helium314.keyboard.latin.R;
 import helium314.keyboard.latin.common.ColorType;
 import helium314.keyboard.latin.common.Colors;
 import helium314.keyboard.latin.common.Constants;
+import helium314.keyboard.latin.common.KeyFace;
 import helium314.keyboard.latin.common.StringUtilsKt;
 import helium314.keyboard.latin.settings.Settings;
 import helium314.keyboard.latin.suggestions.MoreSuggestions;
@@ -501,7 +502,19 @@ public class KeyboardView extends View {
             final float adjustmentY = isFunctionalKeyAndRoundedStyle
                     ? hintBaseline * 0.5f
                     : params.mHintLabelVerticalAdjustment * labelCharHeight;
-            canvas.drawText(hintLabel, 0, hintLabel.length(), hintX, hintBaseline + adjustmentY, paint);
+            float drawX = hintX;
+            float drawY = hintBaseline + adjustmentY;
+            final float cornerRadius = key.hasHintLabel() ? 0f : hintCornerRadius();
+            if (cornerRadius > 0f) { // keep the hint inside the rounded corner of the key
+                final float halfW = Math.max(TypefaceUtils.getReferenceDigitWidth(paint), TypefaceUtils.getStringWidth(hintLabel, paint)) / 2f;
+                final float halfH = -paint.ascent() * 0.4f;
+                final float centerOffset = (paint.ascent() + paint.descent()) / 2f;
+                final float[] xy = { drawX, drawY + centerOffset };
+                KeyFace.fitHint(xy, halfW, halfH, keyWidth, keyHeight, cornerRadius);
+                drawX = xy[0];
+                drawY = xy[1] - centerOffset;
+            }
+            canvas.drawText(hintLabel, 0, hintLabel.length(), drawX, drawY, paint);
         } else if (hintIcon != null) {
             int iconSize = (int) (key.selectHintTextSize(params) * mHintFontSizeMultiplier);
             boolean isFunctionalKeyAndRoundedStyle = mColors.getThemeStyle().equals(STYLE_ROUNDED) && (key.hasFunctionalBackground() || key.hasActionKeyBackground());
@@ -526,7 +539,17 @@ public class KeyboardView extends View {
                                       ? iconSize * 0.5f
                                       : params.mHintLabelVerticalAdjustment * iconSize;
             hintIcon.setColorFilter(key.selectHintTextColor(params), PorterDuff.Mode.MULTIPLY);
-            drawIcon(canvas, hintIcon, (int)hintX, (int)(hintBaseline + adjustmentY), iconSize, iconSize);
+            float drawX = hintX;
+            float drawY = hintBaseline + adjustmentY;
+            final float cornerRadius = key.hasHintLabel() ? 0f : hintCornerRadius();
+            if (cornerRadius > 0f) { // keep the hint inside the rounded corner of the key
+                final float half = iconSize / 2f;
+                final float[] xy = { drawX + half, drawY + half };
+                KeyFace.fitHint(xy, half, half, keyWidth, keyHeight, cornerRadius);
+                drawX = xy[0] - half;
+                drawY = xy[1] - half;
+            }
+            drawIcon(canvas, hintIcon, (int)drawX, (int)drawY, iconSize, iconSize);
         } else if (key.getPopupKeys() != null && ! key.hasNoPanelAutoPopupKey()
                         && (key.hasActionKeyBackground() || key.getBackgroundType() == Key.BACKGROUND_TYPE_FUNCTIONAL)) {
             drawKeyPopupHint(key, canvas, paint, params);
@@ -545,6 +568,15 @@ public class KeyboardView extends View {
             setKeyIconColor(key, icon, keyboard);
             drawIcon(canvas, icon, iconX, iconY, iconWidth, iconHeight);
         }
+    }
+
+    private float mHintCornerRadius = -1f;
+
+    /** Corner radius of our own key styles, 0 for the theme's keys. Read once per keyboard view. */
+    private float hintCornerRadius() {
+        if (mHintCornerRadius < 0f)
+            mHintCornerRadius = KeyFace.hintRadiusPx(getContext(), mColors.getHasKeyBorders());
+        return mHintCornerRadius;
     }
 
     // Draw popup hint "..." at the center or bottom right corner of the key, depending on style.

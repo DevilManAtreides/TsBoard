@@ -65,8 +65,15 @@ fun AppearanceScreen(
         Settings.PREF_ACCENT_SHIFTED_ICON,
         Settings.PREF_CUSTOM_ICON_NAMES,
         Settings.PREF_THEME_KEY_BORDERS,
-        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)) Settings.PREF_KEY_OUTLINE_WIDTH else null,
-        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)) Settings.PREF_KEY_OUTLINE_COLOR else null,
+        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)) Settings.PREF_KEY_EDGE else null,
+        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)
+            && KeyFace.edge(prefs) == KeyFace.EDGE_OUTLINE) Settings.PREF_KEY_OUTLINE_WIDTH else null,
+        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)
+            && KeyFace.edge(prefs) == KeyFace.EDGE_OUTLINE) Settings.PREF_KEY_OUTLINE_COLOR else null,
+        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)
+            && KeyFace.edge(prefs) == KeyFace.EDGE_GLOW) Settings.PREF_KEY_GLOW_SIZE else null,
+        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)
+            && KeyFace.edge(prefs) == KeyFace.EDGE_GLOW) Settings.PREF_KEY_GLOW_COLOR else null,
         if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)) Settings.PREF_KEY_STYLE else null,
         if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)
             && prefs.getString(Settings.PREF_KEY_STYLE, Defaults.PREF_KEY_STYLE) != KeyFace.THEME) Settings.PREF_KEY_CORNER_RADIUS else null,
@@ -217,6 +224,48 @@ fun createAppearanceSettings(context: Context) = listOf(
             range = 0f..8f,
             stepSize = 1,
         ) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
+    },
+    Setting(context, Settings.PREF_KEY_EDGE, R.string.key_edge) { setting ->
+        val ctx = LocalContext.current
+        val b = (ctx.getActivity() as? SettingsActivity)?.prefChanged?.collectAsState()
+        if ((b?.value ?: 0) < 0)
+            Log.v("irrelevant", "stupid way to trigger recomposition on preference change")
+        val items = listOf(
+            ctx.getString(R.string.key_edge_outline) to KeyFace.EDGE_OUTLINE,
+            ctx.getString(R.string.key_edge_glow) to KeyFace.EDGE_GLOW,
+        )
+        ListPreference(setting, items, Defaults.PREF_KEY_EDGE, { ctx.prefs().edit { remove(Settings.PREF_KEY_EDGE) } }) {
+            KeyboardSwitcher.getInstance().setThemeNeedsReload()
+        }
+    },
+    Setting(context, Settings.PREF_KEY_GLOW_SIZE, R.string.key_glow_size) { setting ->
+        SliderPreference(
+            name = setting.title,
+            key = setting.key,
+            default = Defaults.PREF_KEY_GLOW_SIZE,
+            description = { if (it <= 0) "-" else "$it dp" },
+            range = 0f..16f,
+            stepSize = 1,
+        ) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
+    },
+    Setting(context, Settings.PREF_KEY_GLOW_COLOR, R.string.key_glow_color, R.string.key_glow_color_summary) { setting ->
+        val prefs = LocalContext.current.prefs()
+        var show by rememberSaveable { mutableStateOf(false) }
+        Preference(name = setting.title, description = setting.description, onClick = { show = true })
+        if (show)
+            ColorPickerDialog(
+                onDismissRequest = { show = false },
+                initialColor = prefs.getInt(Settings.PREF_KEY_GLOW_COLOR, Defaults.PREF_KEY_GLOW_COLOR),
+                title = setting.title,
+                showDefault = prefs.contains(Settings.PREF_KEY_GLOW_COLOR),
+                onDefault = {
+                    prefs.edit { remove(Settings.PREF_KEY_GLOW_COLOR) }
+                    KeyboardSwitcher.getInstance().setThemeNeedsReload()
+                },
+            ) { color ->
+                prefs.edit { putInt(Settings.PREF_KEY_GLOW_COLOR, color) }
+                KeyboardSwitcher.getInstance().setThemeNeedsReload()
+            }
     },
     Setting(context, Settings.PREF_KEY_STYLE, R.string.key_style) { setting ->
         val ctx = LocalContext.current
