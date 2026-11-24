@@ -15,14 +15,18 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
+import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.Region;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,13 +40,17 @@ import helium314.keyboard.latin.common.ColorType;
 import helium314.keyboard.latin.common.Colors;
 import helium314.keyboard.latin.common.Constants;
 import helium314.keyboard.latin.common.KeyFace;
+import helium314.keyboard.latin.common.KeyPressAnimation;
 import helium314.keyboard.latin.common.StringUtilsKt;
 import helium314.keyboard.latin.settings.Settings;
 import helium314.keyboard.latin.suggestions.MoreSuggestions;
 import helium314.keyboard.latin.suggestions.MoreSuggestionsView;
 import helium314.keyboard.latin.utils.TypefaceUtils;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 
 /** A view that renders a virtual {@link Keyboard}. */
 // todo: this ThemeStyle-dependent stuff really should not be in here!
@@ -184,6 +192,7 @@ public class KeyboardView extends View {
             setBackgroundColor(Color.TRANSPARENT);
         }
 
+        mKeyAnimations.clear();
         mKeyboard = keyboard;
         mKeyScaleForText = (float) Math.sqrt(1 / Settings.getValues().mKeyboardHeightScale);
         int scale = Math.min(2 * keyboard.mMostCommonKeyWidth, keyboard.mMostCommonKeyHeight - keyboard.mVerticalGap);
@@ -285,6 +294,7 @@ public class KeyboardView extends View {
             return;
         }
 
+        mAnimNow = AnimationUtils.currentAnimationTimeMillis();
         mShowsHints = Settings.getValues().mShowsHints;
         final float scale = Settings.getValues().mKeyboardHeightScale;
         mIconScaleFactor = scale < 0.8f ? scale + 0.2f : 1f;
@@ -324,8 +334,139 @@ public class KeyboardView extends View {
             }
         }
 
+        if (isHardwareAccelerated()) drawKeyAnimations(canvas);
+
         mInvalidatedKeys.clear();
         mInvalidateAllKeys = false;
+    }
+
+    // ---- key press animations, only started by the main keyboard view ----
+
+    private static final class KeyAnimation {
+        final long start;
+        long releasedAt = -1;
+        float releasedAmount;
+        KeyAnimation(final long start) { this.start = start; }
+    }
+
+    private static final float SQUISH_DEPTH = 0.08f;
+    private static final float SQUISH_DOWN_MS = 50f;
+    private static final long STALE_MS = 3000;
+
+    private final HashMap<Key, KeyAnimation> mKeyAnimations = new HashMap<>();
+    private final Paint mAnimPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Path mAnimPath = new Path();
+    private final RectF mAnimRect = new RectF();
+    private KeyPressAnimation.Config mAnim; // null: no animation
+    private boolean mAnimLoaded;
+    private float mAnimOwnCorner;
+    private long mAnimNow;
+
+    protected void startKeyAnimation(@NonNull final Key key) {
+        // the software drawing path only redraws the key itself, which does not work for effects around it
+        if (!isHardwareAccelerated()) return;
+        if (!mAnimLoaded) {
+            mAnim = KeyPressAnimation.load(getContext());
+            mAnimOwnCorner = KeyFace.hintRadiusPx(getContext(), mColors.getHasKeyBorders());
+            mAnimLoaded = true;
+        }
+        if (mAnim == null) return;
+        mKeyAnimations.put(key, new KeyAnimation(AnimationUtils.currentAnimationTimeMillis()));
+        postInvalidateOnAnimation();
+    }
+
+    protected void releaseKeyAnimation(@NonNull final Key key) {
+        final KeyAnimation animation = mKeyAnimations.get(key);
+        if (animation == null || mAnim == null || animation.releasedAt >= 0) return;
+        final long now = AnimationUtils.currentAnimationTimeMillis();
+        // a quick tap should still be seen, so the key is at least most of the way down when released
+        animation.releasedAmount = Math.max(0.7f, squishAmount(animation, now));
+        animation.releasedAt = now;
+        postInvalidateOnAnimation();
+    }
+
+    /** 0 = key at normal size, 1 = fully squished */
+    private float squishAmount(@NonNull final KeyAnimation animation, final long now) {
+        if (animation.releasedAt < 0)
+            return KeyPressAnimation.easeOut((now - animation.start) / SQUISH_DOWN_MS);
+        final float up = (now - animation.releasedAt) / (float) mAnim.durationMs;
+        return animation.releasedAmount * (1f - KeyPressAnimation.easeOut(up));
+    }
+
+    private float animCorner(@NonNull final Key key, final float width, final float height) {
+        if (mAnimOwnCorner > 0f) return mAnimOwnCorner;
+        final float density = getResources().getDisplayMetrics().density;
+        final boolean rounded = mColors.getThemeStyle().equals(STYLE_ROUNDED);
+        if (rounded && (key.hasFunctionalBackground() || key.hasActionKeyBackground()))
+            return Math.min(width, height) / 2f;
+        return (rounded ? 10f : 5f) * density;
+    }
+
+    /** Draws the rings and glows over the keys, and keeps the redraws going until all animations are done. */
+    private void drawKeyAnimations(@NonNull final Canvas canvas) {
+        if (mKeyAnimations.isEmpty() || mAnim == null) return;
+        final Keyboard keyboard = getKeyboard();
+        final boolean squish = KeyPressAnimation.SQUISH.equals(mAnim.style);
+        boolean active = false;
+        final Iterator<Map.Entry<Key, KeyAnimation>> iterator = mKeyAnimations.entrySet().iterator();
+        while (iterator.hasNext()) {
+            final Map.Entry<Key, KeyAnimation> entry = iterator.next();
+            final Key key = entry.getKey();
+            final KeyAnimation animation = entry.getValue();
+            final boolean done = (keyboard == null || !keyboard.hasKey(key))
+                    || (squish
+                        ? (animation.releasedAt >= 0 ? mAnimNow - animation.releasedAt >= mAnim.durationMs : mAnimNow - animation.start > STALE_MS)
+                        : mAnimNow - animation.start >= mAnim.durationMs);
+            if (done) {
+                iterator.remove();
+                continue;
+            }
+            // a key that is held down stays squished without needing more frames
+            if (!squish || animation.releasedAt >= 0 || mAnimNow - animation.start <= 3 * SQUISH_DOWN_MS)
+                active = true;
+            if (!squish) drawRingOrGlow(canvas, key, animation);
+        }
+        if (active) postInvalidateOnAnimation();
+    }
+
+    @SuppressWarnings("deprecation") // Region.Op.DIFFERENCE is still the way to clip out a shape before API 26
+    private void drawRingOrGlow(@NonNull final Canvas canvas, @NonNull final Key key, @NonNull final KeyAnimation animation) {
+        final float progress = Math.min(1f, (mAnimNow - animation.start) / (float) mAnim.durationMs);
+        final float spread = mAnim.sizePx * KeyPressAnimation.easeOut(progress);
+        if (spread < 0.5f) return;
+        final float fade = 1f - progress;
+        final float left = key.getDrawX() + getPaddingLeft();
+        final float top = key.getY() + getPaddingTop();
+        final float width = key.getDrawWidth();
+        final float height = key.getHeight();
+        final float radius = Math.min(animCorner(key, width, height), Math.min(width, height) / 2f);
+        final int baseAlpha = Color.alpha(mAnim.color);
+        mAnimPaint.setStyle(Paint.Style.STROKE);
+        mAnimPaint.setColor(mAnim.color);
+        if (KeyPressAnimation.PULSE.equals(mAnim.style)) {
+            // a ring that grows away from the key and gets thinner and fainter
+            final float stroke = Math.max(1f, 2f * getResources().getDisplayMetrics().density) * (1f - 0.5f * progress);
+            mAnimPaint.setStrokeWidth(stroke);
+            mAnimPaint.setAlpha((int) (baseAlpha * fade));
+            mAnimRect.set(left - spread, top - spread, left + width + spread, top + height + spread);
+            canvas.drawRoundRect(mAnimRect, radius + spread, radius + spread, mAnimPaint);
+        } else {
+            // a glow that is brightest at the key edge and fades outwards, only drawn outside the key
+            mAnimRect.set(left, top, left + width, top + height);
+            mAnimPath.reset();
+            mAnimPath.addRoundRect(mAnimRect, radius, radius, Path.Direction.CW);
+            canvas.save();
+            canvas.clipPath(mAnimPath, Region.Op.DIFFERENCE);
+            final int steps = 6;
+            mAnimPaint.setAlpha(Math.max(1, (int) (baseAlpha * fade * 2f / (steps + 1))));
+            final int stepAlpha = mAnimPaint.getAlpha();
+            for (int i = 1; i <= steps; i++) {
+                mAnimPaint.setStrokeWidth(2f * spread * i / steps);
+                mAnimPaint.setAlpha(stepAlpha);
+                canvas.drawRoundRect(mAnimRect, radius, radius, mAnimPaint);
+            }
+            canvas.restore();
+        }
     }
 
     private void onDrawKey(@NonNull final Key key, @NonNull final Canvas canvas,
@@ -333,6 +474,17 @@ public class KeyboardView extends View {
         final int keyDrawX = key.getDrawX() + getPaddingLeft();
         final int keyDrawY = key.getY() + getPaddingTop();
         canvas.translate(keyDrawX, keyDrawY);
+
+        float squish = 0f;
+        if (mAnim != null && !mKeyAnimations.isEmpty() && KeyPressAnimation.SQUISH.equals(mAnim.style)) {
+            final KeyAnimation animation = mKeyAnimations.get(key);
+            if (animation != null) squish = squishAmount(animation, mAnimNow);
+        }
+        if (squish > 0f) {
+            final float s = 1f - SQUISH_DEPTH * squish;
+            canvas.save();
+            canvas.scale(s, s, key.getDrawWidth() / 2f, key.getHeight() / 2f);
+        }
 
         final KeyVisualAttributes attr = key.getVisualAttributes();
         // don't use the raw key height, linear font scaling with height is too extreme
@@ -346,6 +498,7 @@ public class KeyboardView extends View {
         }
         onDrawKeyTopVisuals(key, canvas, paint, params);
 
+        if (squish > 0f) canvas.restore();
         canvas.translate(-keyDrawX, -keyDrawY);
     }
 

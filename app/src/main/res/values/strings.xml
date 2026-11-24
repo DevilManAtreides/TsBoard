@@ -724,6 +724,15 @@ New dictionary:
     <string name="key_outline_width_summary">Draws a thin line around each key. Needs key borders.</string>
     <string name="key_outline_color">Key outline color</string>
     <!-- Key looks in Appearance, needs key borders -->
+    <string name="key_press_anim">Key press animation</string>
+    <string name="key_press_anim_none">Off</string>
+    <string name="key_press_anim_squish">Squish</string>
+    <string name="key_press_anim_pulse">Growing ring</string>
+    <string name="key_press_anim_glow">Glow</string>
+    <string name="key_anim_color">Animation color</string>
+    <string name="key_anim_color_summary">The opacity bar sets how bright it is</string>
+    <string name="key_anim_size">Animation reach</string>
+    <string name="key_anim_speed">Animation length</string>
     <string name="key_edge">Key edge</string>
     <string name="key_edge_outline">Outline</string>
     <string name="key_edge_glow">Soft glow</string>

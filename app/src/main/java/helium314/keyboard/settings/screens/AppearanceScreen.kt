@@ -20,6 +20,7 @@ import helium314.keyboard.keyboard.KeyboardTheme
 import helium314.keyboard.keyboard.internal.KeyboardIconsSet
 import helium314.keyboard.latin.R
 import helium314.keyboard.latin.common.KeyFace
+import helium314.keyboard.latin.common.KeyPressAnimation
 import helium314.keyboard.latin.settings.Defaults
 import helium314.keyboard.latin.utils.Log
 import helium314.keyboard.latin.utils.getActivity
@@ -81,6 +82,12 @@ fun AppearanceScreen(
             Settings.PREF_THEME_DAY_NIGHT else null,
         Settings.PREF_THEME_COLORS,
         if (dayNightMode) Settings.PREF_THEME_COLORS_NIGHT else null,
+        Settings.PREF_KEY_PRESS_ANIM,
+        if (KeyPressAnimation.style(ctx) == KeyPressAnimation.PULSE || KeyPressAnimation.style(ctx) == KeyPressAnimation.GLOW)
+            Settings.PREF_KEY_ANIM_COLOR else null,
+        if (KeyPressAnimation.style(ctx) == KeyPressAnimation.PULSE || KeyPressAnimation.style(ctx) == KeyPressAnimation.GLOW)
+            Settings.PREF_KEY_ANIM_SIZE else null,
+        if (KeyPressAnimation.style(ctx) != KeyPressAnimation.NONE) Settings.PREF_KEY_ANIM_SPEED else null,
         Settings.PREF_NAVBAR_COLOR,
         Settings.PREF_NAVBAR_BLACK,
         SettingsWithoutKey.BACKGROUND_IMAGE,
@@ -223,6 +230,60 @@ fun createAppearanceSettings(context: Context) = listOf(
             description = { if (it == 0) "-" else "${it / 2f} dp" },
             range = 0f..8f,
             stepSize = 1,
+        ) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
+    },
+    Setting(context, Settings.PREF_KEY_PRESS_ANIM, R.string.key_press_anim) { setting ->
+        val ctx = LocalContext.current
+        val b = (ctx.getActivity() as? SettingsActivity)?.prefChanged?.collectAsState()
+        if ((b?.value ?: 0) < 0)
+            Log.v("irrelevant", "stupid way to trigger recomposition on preference change")
+        val items = listOf(
+            ctx.getString(R.string.key_press_anim_none) to KeyPressAnimation.NONE,
+            ctx.getString(R.string.key_press_anim_squish) to KeyPressAnimation.SQUISH,
+            ctx.getString(R.string.key_press_anim_pulse) to KeyPressAnimation.PULSE,
+            ctx.getString(R.string.key_press_anim_glow) to KeyPressAnimation.GLOW,
+        )
+        ListPreference(setting, items, Defaults.PREF_KEY_PRESS_ANIM, { ctx.prefs().edit { remove(Settings.PREF_KEY_PRESS_ANIM) } }) {
+            KeyboardSwitcher.getInstance().setThemeNeedsReload()
+        }
+    },
+    Setting(context, Settings.PREF_KEY_ANIM_COLOR, R.string.key_anim_color, R.string.key_anim_color_summary) { setting ->
+        val prefs = LocalContext.current.prefs()
+        var show by rememberSaveable { mutableStateOf(false) }
+        Preference(name = setting.title, description = setting.description, onClick = { show = true })
+        if (show)
+            ColorPickerDialog(
+                onDismissRequest = { show = false },
+                initialColor = prefs.getInt(Settings.PREF_KEY_ANIM_COLOR, Defaults.PREF_KEY_ANIM_COLOR),
+                title = setting.title,
+                showDefault = prefs.contains(Settings.PREF_KEY_ANIM_COLOR),
+                onDefault = {
+                    prefs.edit { remove(Settings.PREF_KEY_ANIM_COLOR) }
+                    KeyboardSwitcher.getInstance().setThemeNeedsReload()
+                },
+            ) { color ->
+                prefs.edit { putInt(Settings.PREF_KEY_ANIM_COLOR, color) }
+                KeyboardSwitcher.getInstance().setThemeNeedsReload()
+            }
+    },
+    Setting(context, Settings.PREF_KEY_ANIM_SIZE, R.string.key_anim_size) { setting ->
+        SliderPreference(
+            name = setting.title,
+            key = setting.key,
+            default = Defaults.PREF_KEY_ANIM_SIZE,
+            description = { "$it dp" },
+            range = 2f..30f,
+            stepSize = 1,
+        ) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
+    },
+    Setting(context, Settings.PREF_KEY_ANIM_SPEED, R.string.key_anim_speed) { setting ->
+        SliderPreference(
+            name = setting.title,
+            key = setting.key,
+            default = Defaults.PREF_KEY_ANIM_SPEED,
+            description = { "$it ms" },
+            range = 100f..800f,
+            stepSize = 20,
         ) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
     },
     Setting(context, Settings.PREF_KEY_EDGE, R.string.key_edge) { setting ->

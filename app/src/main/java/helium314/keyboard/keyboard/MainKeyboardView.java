@@ -361,6 +361,7 @@ public final class MainKeyboardView extends KeyboardView implements DrawingProxy
     public void onKeyPressed(@NonNull final Key key, final boolean withPreview) {
         key.onPressed();
         invalidateKey(key);
+        startKeyAnimation(key);
 
         final Keyboard keyboard = getKeyboard();
         if (keyboard == null) {
@@ -389,6 +390,7 @@ public final class MainKeyboardView extends KeyboardView implements DrawingProxy
     public void onKeyReleased(@NonNull final Key key, final boolean withAnimation) {
         key.onReleased();
         invalidateKey(key);
+        releaseKeyAnimation(key);
         if (key.hasPreview()) {
             if (withAnimation) {
                 dismissKeyPreview(key);
