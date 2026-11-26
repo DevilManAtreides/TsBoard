@@ -40,6 +40,7 @@ import helium314.keyboard.latin.common.ColorType;
 import helium314.keyboard.latin.common.Colors;
 import helium314.keyboard.latin.common.Constants;
 import helium314.keyboard.latin.common.KeyFace;
+import helium314.keyboard.latin.common.KeyLighting;
 import helium314.keyboard.latin.common.KeyPressAnimation;
 import helium314.keyboard.latin.common.StringUtilsKt;
 import helium314.keyboard.latin.settings.Settings;
@@ -48,6 +49,7 @@ import helium314.keyboard.latin.suggestions.MoreSuggestionsView;
 import helium314.keyboard.latin.utils.TypefaceUtils;
 
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -334,7 +336,10 @@ public class KeyboardView extends View {
             }
         }
 
-        if (isHardwareAccelerated()) drawKeyAnimations(canvas);
+        if (isHardwareAccelerated()) {
+            drawKeyLighting(canvas);
+            drawKeyAnimations(canvas);
+        }
 
         mInvalidatedKeys.clear();
         mInvalidateAllKeys = false;
@@ -358,20 +363,44 @@ public class KeyboardView extends View {
     private final Path mAnimPath = new Path();
     private final RectF mAnimRect = new RectF();
     private KeyPressAnimation.Config mAnim; // null: no animation
+    private KeyLighting.Config mLight; // null: no key light
+    private boolean mEffectsEnabled;
     private boolean mAnimLoaded;
     private float mAnimOwnCorner;
     private long mAnimNow;
 
+    private void ensureEffectsLoaded() {
+        if (mAnimLoaded) return;
+        mAnim = KeyPressAnimation.load(getContext());
+        mLight = KeyLighting.load(getContext());
+        mAnimOwnCorner = KeyFace.hintRadiusPx(getContext(), mColors.getHasKeyBorders());
+        mAnimLoaded = true;
+    }
+
+    /** Called by the main keyboard view: only that one shows the key light and the press animations. */
+    protected void enableKeyEffects() {
+        mEffectsEnabled = true;
+    }
+
     protected void startKeyAnimation(@NonNull final Key key) {
         // the software drawing path only redraws the key itself, which does not work for effects around it
         if (!isHardwareAccelerated()) return;
-        if (!mAnimLoaded) {
-            mAnim = KeyPressAnimation.load(getContext());
-            mAnimOwnCorner = KeyFace.hintRadiusPx(getContext(), mColors.getHasKeyBorders());
-            mAnimLoaded = true;
+        ensureEffectsLoaded();
+        final long now = AnimationUtils.currentAnimationTimeMillis();
+        if (mLight != null) {
+            mLightLastTouch = now;
+            if (mLightIdle) {
+                mLightIdle = false;
+                mLightLast = now;
+            }
+            if (KeyLighting.REACTIVE.equals(mLight.style) || KeyLighting.RIPPLE.equals(mLight.style)) {
+                if (mLightPresses.size() >= 6) mLightPresses.remove(0);
+                mLightPresses.add(new LightPress(key, now));
+            }
+            postInvalidateOnAnimation();
         }
         if (mAnim == null) return;
-        mKeyAnimations.put(key, new KeyAnimation(AnimationUtils.currentAnimationTimeMillis()));
+        mKeyAnimations.put(key, new KeyAnimation(now));
         postInvalidateOnAnimation();
     }
 
@@ -400,6 +429,120 @@ public class KeyboardView extends View {
         if (rounded && (key.hasFunctionalBackground() || key.hasActionKeyBackground()))
             return Math.min(width, height) / 2f;
         return (rounded ? 10f : 5f) * density;
+    }
+
+    // ---- key light: an "RGB" ring around every key ----
+
+    private static final class LightPress {
+        final Key key;
+        final long start;
+        LightPress(final Key key, final long start) { this.key = key; this.start = start; }
+    }
+
+    /** After this long without touch the moving light stops and stays as it is, to save battery. */
+    private static final long LIGHT_IDLE_MS = 90_000;
+    private static final long LIGHT_FRAME_MS = 33; // about 30 frames per second
+
+    private final ArrayList<LightPress> mLightPresses = new ArrayList<>();
+    private final Paint mLightPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Path mLightPath = new Path();
+    private final RectF mLightRect = new RectF();
+    private long mLightLast;
+    private long mLightLastTouch;
+    private float mLightT;
+    private boolean mLightIdle;
+
+    private void drawKeyLighting(@NonNull final Canvas canvas) {
+        if (!mEffectsEnabled) return;
+        ensureEffectsLoaded();
+        final Keyboard keyboard = getKeyboard();
+        if (mLight == null || keyboard == null) return;
+        final long now = mAnimNow;
+        // coming back to a keyboard that has not been drawn for a while counts as a new start
+        if (mLightLast == 0 || now - mLightLast > 1000) {
+            mLightLastTouch = now;
+            mLightIdle = false;
+            mLightLast = now;
+        }
+        if (!mLightIdle && now - mLightLastTouch > LIGHT_IDLE_MS) mLightIdle = true;
+        if (!mLightIdle) {
+            mLightT += Math.min(100L, now - mLightLast) / 1000f;
+            mLightLast = now;
+        }
+        final boolean continuous = KeyLighting.isContinuous(mLight.style);
+        final boolean reactive = KeyLighting.REACTIVE.equals(mLight.style);
+        final boolean ripple = KeyLighting.RIPPLE.equals(mLight.style);
+        final long fadeMs = (long) (1500 - 110 * mLight.speed); // 1.4 s .. 0.4 s
+        for (int i = mLightPresses.size() - 1; i >= 0; i--) {
+            if (now - mLightPresses.get(i).start > (ripple ? 1800 : fadeMs)) mLightPresses.remove(i);
+        }
+        final float density = getResources().getDisplayMetrics().density;
+        final float width = Math.max(1, getWidth());
+        for (final Key key : keyboard.getSortedKeys()) {
+            if (key.isSpacer()) continue;
+            final float keyCenterX = key.getX() + key.getWidth() / 2f + getPaddingLeft();
+            final float keyCenterY = key.getY() + key.getHeight() / 2f + getPaddingTop();
+            final float x = keyCenterX / width;
+            int color = 0;
+            if (continuous) {
+                color = KeyLighting.colorAt(mLight, mLightT, x);
+            } else if (reactive) {
+                float strength = 0f;
+                for (final LightPress press : mLightPresses) {
+                    if (press.key != key) continue;
+                    strength = Math.max(strength, 1f - (now - press.start) / (float) fadeMs);
+                }
+                if (strength > 0.03f) color = KeyLighting.withAlpha(KeyLighting.colorForPress(mLight, x), strength);
+            } else if (ripple) {
+                float strength = 0f;
+                final float speedPx = (120 + 60 * mLight.speed) * density; // px per second
+                final float band = 45 * density;
+                for (final LightPress press : mLightPresses) {
+                    final float elapsed = (now - press.start) / 1000f;
+                    final float dx = keyCenterX - (press.key.getX() + press.key.getWidth() / 2f + getPaddingLeft());
+                    final float dy = keyCenterY - (press.key.getY() + press.key.getHeight() / 2f + getPaddingTop());
+                    final float off = ((float) Math.hypot(dx, dy) - elapsed * speedPx) / band;
+                    final float fade = Math.max(0f, 1f - elapsed / 1.8f);
+                    strength = Math.max(strength, (float) Math.exp(-off * off) * fade);
+                }
+                if (strength > 0.03f) color = KeyLighting.withAlpha(KeyLighting.colorForPress(mLight, x), strength);
+            }
+            if (Color.alpha(color) > 6) drawLightRing(canvas, key, color);
+        }
+        // keep going while something moves; a quiet keyboard needs no redraws
+        if (!mLightIdle && (continuous || !mLightPresses.isEmpty()))
+            postInvalidateDelayed(LIGHT_FRAME_MS);
+    }
+
+    private void drawLightRing(@NonNull final Canvas canvas, @NonNull final Key key, final int color) {
+        final float left = key.getDrawX() + getPaddingLeft();
+        final float top = key.getY() + getPaddingTop();
+        final float width = key.getDrawWidth();
+        final float height = key.getHeight();
+        final float radius = Math.min(animCorner(key, width, height), Math.min(width, height) / 2f);
+        mLightPaint.setStyle(Paint.Style.STROKE);
+        mLightPaint.setColor(color);
+        final float half = mLight.widthPx / 2f;
+        mLightRect.set(left, top, left + width, top + height);
+        if (mLight.glowPx > 0f) { // soft glow inside the key edge
+            mLightPath.reset();
+            mLightPath.addRoundRect(mLightRect, radius, radius, Path.Direction.CW);
+            canvas.save();
+            canvas.clipPath(mLightPath);
+            final int steps = 3;
+            mLightPaint.setAlpha(Math.max(1, Color.alpha(color) * 2 / (steps + 1) / 2));
+            final int stepAlpha = mLightPaint.getAlpha();
+            for (int i = 1; i <= steps; i++) {
+                mLightPaint.setStrokeWidth(2f * mLight.glowPx * i / steps);
+                mLightPaint.setAlpha(stepAlpha);
+                canvas.drawRoundRect(mLightRect, radius, radius, mLightPaint);
+            }
+            canvas.restore();
+            mLightPaint.setColor(color);
+        }
+        mLightPaint.setStrokeWidth(mLight.widthPx);
+        mLightRect.inset(half, half);
+        canvas.drawRoundRect(mLightRect, Math.max(0f, radius - half), Math.max(0f, radius - half), mLightPaint);
     }
 
     /** Draws the rings and glows over the keys, and keeps the redraws going until all animations are done. */

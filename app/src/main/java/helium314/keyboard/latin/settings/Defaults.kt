@@ -59,6 +59,17 @@ object Defaults {
     const val PREF_KEY_STYLE = "theme"
     const val PREF_KEY_EDGE = "outline"
     const val PREF_KEY_PRESS_ANIM = "none"
+    const val PREF_KEY_STYLE_COLOR_A = 0xFF3DF2FF.toInt()
+    const val PREF_KEY_STYLE_COLOR_B = 0xFFFF4FD8.toInt()
+    const val PREF_KEY_LIGHT_PATTERN = "off"
+    /** 1..10 */
+    const val PREF_KEY_LIGHT_SPEED = 5
+    const val PREF_KEY_LIGHT_COLOR_A = 0xFF3DF2FF.toInt()
+    const val PREF_KEY_LIGHT_COLOR_B = 0xFFFF4FD8.toInt()
+    /** in steps of 0.5 dp */
+    const val PREF_KEY_LIGHT_WIDTH = 3
+    /** dp */
+    const val PREF_KEY_LIGHT_GLOW = 4
     const val PREF_KEY_ANIM_COLOR = 0xCCFFFFFF.toInt()
     /** dp, how far the ring or glow spreads */
     const val PREF_KEY_ANIM_SIZE = 10

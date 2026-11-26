@@ -132,6 +132,7 @@ public final class MainKeyboardView extends KeyboardView implements DrawingProxy
 
     public MainKeyboardView(final Context context, final AttributeSet attrs, final int defStyle) {
         super(context, attrs, defStyle);
+        enableKeyEffects();
 
         final DrawingPreviewPlacerView drawingPreviewPlacerView =
                 new DrawingPreviewPlacerView(new ContextThemeWrapper(context, R.style.platformActivityTheme), attrs);

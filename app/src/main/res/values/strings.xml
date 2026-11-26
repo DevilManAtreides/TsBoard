@@ -758,6 +758,26 @@ New dictionary:
     <string name="key_style_flat">Flat</string>
     <string name="key_style_jelly">Jelly (domed, glossy)</string>
     <string name="key_style_glass">Glass</string>
+    <string name="key_style_keycap">Keycap (raised 3D)</string>
+    <string name="key_style_neon">Neon</string>
+    <string name="key_style_ghost">Ghost (outline only)</string>
+    <string name="key_style_gradient">Gradient</string>
+    <string name="key_style_color_a">Style color 1</string>
+    <string name="key_style_color_b">Style color 2</string>
+    <string name="key_light_pattern">Key light (RGB)</string>
+    <string name="key_light_pattern_summary">A colored light around the keys. Moving patterns use more battery and stop after 90 seconds without touch.</string>
+    <string name="key_light_off">Off</string>
+    <string name="key_light_wave">Rainbow wave</string>
+    <string name="key_light_flow">Gradient flow</string>
+    <string name="key_light_breathe">Breathing</string>
+    <string name="key_light_cycle">Color cycle</string>
+    <string name="key_light_reactive">Reactive (lights the pressed key)</string>
+    <string name="key_light_ripple">Ripple</string>
+    <string name="key_light_speed">Light speed</string>
+    <string name="key_light_color_a">Light color 1</string>
+    <string name="key_light_color_b">Light color 2</string>
+    <string name="key_light_width">Light line thickness</string>
+    <string name="key_light_glow">Light glow size</string>
     <string name="key_corner_radius">Key corner radius</string>
     <!-- Option for choosing whether the shift icon should be accent-colored in shift and caps lock modes -->
     <string name="accent_shifted_icon">Accented shift icon</string>

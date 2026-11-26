@@ -20,6 +20,7 @@ import helium314.keyboard.keyboard.KeyboardTheme
 import helium314.keyboard.keyboard.internal.KeyboardIconsSet
 import helium314.keyboard.latin.R
 import helium314.keyboard.latin.common.KeyFace
+import helium314.keyboard.latin.common.KeyLighting
 import helium314.keyboard.latin.common.KeyPressAnimation
 import helium314.keyboard.latin.settings.Defaults
 import helium314.keyboard.latin.utils.Log
@@ -78,6 +79,18 @@ fun AppearanceScreen(
         if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)) Settings.PREF_KEY_STYLE else null,
         if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)
             && prefs.getString(Settings.PREF_KEY_STYLE, Defaults.PREF_KEY_STYLE) != KeyFace.THEME) Settings.PREF_KEY_CORNER_RADIUS else null,
+        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)
+            && KeyFace.style(prefs).let { it == KeyFace.NEON || it == KeyFace.GRADIENT }) Settings.PREF_KEY_STYLE_COLOR_A else null,
+        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)
+            && KeyFace.style(prefs) == KeyFace.GRADIENT) Settings.PREF_KEY_STYLE_COLOR_B else null,
+        Settings.PREF_KEY_LIGHT_PATTERN,
+        if (KeyLighting.style(ctx) != KeyLighting.OFF) Settings.PREF_KEY_LIGHT_SPEED else null,
+        if (KeyLighting.style(ctx).let { it == KeyLighting.FLOW || it == KeyLighting.BREATHE || it == KeyLighting.REACTIVE || it == KeyLighting.RIPPLE })
+            Settings.PREF_KEY_LIGHT_COLOR_A else null,
+        if (KeyLighting.style(ctx).let { it == KeyLighting.FLOW || it == KeyLighting.REACTIVE || it == KeyLighting.RIPPLE })
+            Settings.PREF_KEY_LIGHT_COLOR_B else null,
+        if (KeyLighting.style(ctx) != KeyLighting.OFF) Settings.PREF_KEY_LIGHT_WIDTH else null,
+        if (KeyLighting.style(ctx) != KeyLighting.OFF) Settings.PREF_KEY_LIGHT_GLOW else null,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
             Settings.PREF_THEME_DAY_NIGHT else null,
         Settings.PREF_THEME_COLORS,
@@ -232,6 +245,66 @@ fun createAppearanceSettings(context: Context) = listOf(
             stepSize = 1,
         ) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
     },
+    Setting(context, Settings.PREF_KEY_STYLE_COLOR_A, R.string.key_style_color_a) {
+        KeyColorRow(it, Settings.PREF_KEY_STYLE_COLOR_A, Defaults.PREF_KEY_STYLE_COLOR_A)
+    },
+    Setting(context, Settings.PREF_KEY_STYLE_COLOR_B, R.string.key_style_color_b) {
+        KeyColorRow(it, Settings.PREF_KEY_STYLE_COLOR_B, Defaults.PREF_KEY_STYLE_COLOR_B)
+    },
+    Setting(context, Settings.PREF_KEY_LIGHT_PATTERN, R.string.key_light_pattern, R.string.key_light_pattern_summary) { setting ->
+        val ctx = LocalContext.current
+        val b = (ctx.getActivity() as? SettingsActivity)?.prefChanged?.collectAsState()
+        if ((b?.value ?: 0) < 0)
+            Log.v("irrelevant", "stupid way to trigger recomposition on preference change")
+        val items = listOf(
+            ctx.getString(R.string.key_light_off) to KeyLighting.OFF,
+            ctx.getString(R.string.key_light_wave) to KeyLighting.WAVE,
+            ctx.getString(R.string.key_light_flow) to KeyLighting.FLOW,
+            ctx.getString(R.string.key_light_breathe) to KeyLighting.BREATHE,
+            ctx.getString(R.string.key_light_cycle) to KeyLighting.CYCLE,
+            ctx.getString(R.string.key_light_reactive) to KeyLighting.REACTIVE,
+            ctx.getString(R.string.key_light_ripple) to KeyLighting.RIPPLE,
+        )
+        ListPreference(setting, items, Defaults.PREF_KEY_LIGHT_PATTERN, { ctx.prefs().edit { remove(Settings.PREF_KEY_LIGHT_PATTERN) } }) {
+            KeyboardSwitcher.getInstance().setThemeNeedsReload()
+        }
+    },
+    Setting(context, Settings.PREF_KEY_LIGHT_SPEED, R.string.key_light_speed) { setting ->
+        SliderPreference(
+            name = setting.title,
+            key = setting.key,
+            default = Defaults.PREF_KEY_LIGHT_SPEED,
+            description = { "$it" },
+            range = 1f..10f,
+            stepSize = 1,
+        ) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
+    },
+    Setting(context, Settings.PREF_KEY_LIGHT_COLOR_A, R.string.key_light_color_a) {
+        KeyColorRow(it, Settings.PREF_KEY_LIGHT_COLOR_A, Defaults.PREF_KEY_LIGHT_COLOR_A)
+    },
+    Setting(context, Settings.PREF_KEY_LIGHT_COLOR_B, R.string.key_light_color_b) {
+        KeyColorRow(it, Settings.PREF_KEY_LIGHT_COLOR_B, Defaults.PREF_KEY_LIGHT_COLOR_B)
+    },
+    Setting(context, Settings.PREF_KEY_LIGHT_WIDTH, R.string.key_light_width) { setting ->
+        SliderPreference(
+            name = setting.title,
+            key = setting.key,
+            default = Defaults.PREF_KEY_LIGHT_WIDTH,
+            description = { "${it / 2f} dp" },
+            range = 1f..10f,
+            stepSize = 1,
+        ) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
+    },
+    Setting(context, Settings.PREF_KEY_LIGHT_GLOW, R.string.key_light_glow) { setting ->
+        SliderPreference(
+            name = setting.title,
+            key = setting.key,
+            default = Defaults.PREF_KEY_LIGHT_GLOW,
+            description = { if (it <= 0) "-" else "$it dp" },
+            range = 0f..12f,
+            stepSize = 1,
+        ) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
+    },
     Setting(context, Settings.PREF_KEY_PRESS_ANIM, R.string.key_press_anim) { setting ->
         val ctx = LocalContext.current
         val b = (ctx.getActivity() as? SettingsActivity)?.prefChanged?.collectAsState()
@@ -338,6 +411,10 @@ fun createAppearanceSettings(context: Context) = listOf(
             ctx.getString(R.string.key_style_flat) to KeyFace.FLAT,
             ctx.getString(R.string.key_style_jelly) to KeyFace.JELLY,
             ctx.getString(R.string.key_style_glass) to KeyFace.GLASS,
+            ctx.getString(R.string.key_style_keycap) to KeyFace.KEYCAP,
+            ctx.getString(R.string.key_style_neon) to KeyFace.NEON,
+            ctx.getString(R.string.key_style_ghost) to KeyFace.GHOST,
+            ctx.getString(R.string.key_style_gradient) to KeyFace.GRADIENT,
         )
         ListPreference(setting, items, Defaults.PREF_KEY_STYLE, { ctx.prefs().edit { remove(Settings.PREF_KEY_STYLE) } }) {
             KeyboardSwitcher.getInstance().setThemeNeedsReload()
@@ -578,4 +655,26 @@ private fun Preview() {
 private fun reloadBackgroundImage() {
     Settings.clearCachedBackgroundImages()
     KeyboardSwitcher.getInstance().setThemeNeedsReload()
+}
+
+/** A row that opens the color picker and stores the chosen color (with opacity) under [key]. */
+@Composable
+private fun KeyColorRow(setting: Setting, key: String, default: Int) {
+    val prefs = LocalContext.current.prefs()
+    var show by rememberSaveable { mutableStateOf(false) }
+    Preference(name = setting.title, description = setting.description, onClick = { show = true })
+    if (show)
+        ColorPickerDialog(
+            onDismissRequest = { show = false },
+            initialColor = prefs.getInt(key, default),
+            title = setting.title,
+            showDefault = prefs.contains(key),
+            onDefault = {
+                prefs.edit { remove(key) }
+                KeyboardSwitcher.getInstance().setThemeNeedsReload()
+            },
+        ) { color ->
+            prefs.edit { putInt(key, color) }
+            KeyboardSwitcher.getInstance().setThemeNeedsReload()
+        }
 }

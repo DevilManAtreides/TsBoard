@@ -29,6 +29,14 @@ object KeyFace {
     const val JELLY = "jelly"
     /** see-through keys with a bright edge */
     const val GLASS = "glass"
+    /** a raised 3D cap that sinks when pressed */
+    const val KEYCAP = "keycap"
+    /** dark keys with a glowing edge */
+    const val NEON = "neon"
+    /** only an outline, see-through inside */
+    const val GHOST = "ghost"
+    /** a sweep from one color to another on every key */
+    const val GRADIENT = "gradient"
 
     /** Slider value for fully round ends. Smaller values are a corner radius in dp. */
     const val PILL = 25
@@ -36,7 +44,7 @@ object KeyFace {
     @JvmStatic
     fun style(prefs: SharedPreferences): String {
         val style = prefs.getString(Settings.PREF_KEY_STYLE, Defaults.PREF_KEY_STYLE)
-        return if (style == FLAT || style == JELLY || style == GLASS) style else THEME
+        return if (style in listOf(FLAT, JELLY, GLASS, KEYCAP, NEON, GHOST, GRADIENT)) style!! else THEME
     }
 
     const val EDGE_OUTLINE = "outline"
@@ -86,33 +94,74 @@ object KeyFace {
 
 /**
  * The face of a key for the styles in [KeyFace]. The body is a plain shape that the theme colors tint,
- * like they tint the normal key drawables, so the colors from Settings keep working. Highlights and
- * shading are drawn on top and are not tinted.
+ * like they tint the normal key drawables, so the colors from Settings keep working (except for the
+ * gradient style, which has colors of its own). Highlights and shading are drawn on top and are not tinted.
  */
-class KeyFaceDrawable(private val style: String, private val radius: Float, density: Float) : Drawable() {
+class KeyFaceDrawable(
+    private val style: String,
+    private val radius: Float,
+    density: Float,
+    private val colorA: Int = 0xFF3DF2FF.toInt(),
+    private val colorB: Int = 0xFFFF4FD8.toInt(),
+) : Drawable() {
     private val glass = style == KeyFace.GLASS
     private val jelly = style == KeyFace.JELLY
+    private val keycap = style == KeyFace.KEYCAP
+    private val neon = style == KeyFace.NEON
+    private val ghost = style == KeyFace.GHOST
+    private val gradient = style == KeyFace.GRADIENT
+
+    /** how far a keycap stands out below its top */
+    private val sideHeight = if (keycap) 3.5f * density else 0f
 
     private val body = GradientDrawable().apply {
         shape = GradientDrawable.RECTANGLE
         cornerRadius = radius
-        // glass keys are see-through before the theme color is applied
-        setColor(if (glass) 0x73FFFFFF else Color.WHITE)
+        when {
+            gradient -> {
+                setOrientation(GradientDrawable.Orientation.TL_BR)
+                setColors(intArrayOf(colorA, colorB))
+            }
+            glass -> setColor(0x73FFFFFF) // see-through before the theme color is applied
+            neon -> setColor(0xD9FFFFFF.toInt())
+            ghost -> setColor(0x59FFFFFF)
+            else -> setColor(Color.WHITE)
+        }
     }
-    /** darkens towards the bottom, or towards the top while pressed */
+    /** the side of a keycap */
+    private val side = if (keycap) GradientDrawable().apply {
+        shape = GradientDrawable.RECTANGLE
+        cornerRadius = radius
+        setColor(0xB3000000.toInt())
+    } else null
+    /** darkens towards the bottom, or towards the top while pressed; for the gradient only while pressed */
     private val shade = if (jelly) GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(0x00000000, 0x59000000)).apply {
         cornerRadius = radius
+    } else if (gradient) GradientDrawable().apply {
+        shape = GradientDrawable.RECTANGLE
+        cornerRadius = radius
+        setColor(0x40000000)
     } else null
     /** the glossy spot near the top of the key */
     private val gloss = if (jelly || glass) GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
         if (jelly) intArrayOf(0xB8FFFFFF.toInt(), 0x14FFFFFF) else intArrayOf(0x59FFFFFF, 0x05FFFFFF)).apply {
         cornerRadius = radius * 0.85f
     } else null
-    private val edge = if (jelly || glass) GradientDrawable().apply {
+    /** the dish on top of a keycap */
+    private val dish = if (keycap) GradientDrawable().apply {
+        shape = GradientDrawable.RECTANGLE
+        cornerRadius = radius * 0.7f
+        setColor(Color.TRANSPARENT)
+        setStroke(maxOf(1, Math.round(density)), 0x59000000)
+    } else null
+    private val neonGlow = if (neon) KeyGlowDrawable(radius, (colorA and 0x00FFFFFF) or 0x99000000.toInt(), 5f * density) else null
+    private val edge = if (jelly || glass || neon || ghost || keycap) GradientDrawable().apply {
         shape = GradientDrawable.RECTANGLE
         cornerRadius = radius
         setColor(Color.TRANSPARENT)
-        setStroke(maxOf(1, Math.round((if (glass) 1f else 0.6f) * density)), if (glass) 0x99FFFFFF.toInt() else 0x40FFFFFF)
+        val width = when { glass || neon || ghost -> 1.5f; keycap -> 1f; else -> 0.6f }
+        val color = when { neon -> colorA or 0xFF000000.toInt(); ghost -> 0xB3FFFFFF.toInt(); glass -> 0x99FFFFFF.toInt(); keycap -> 0x40FFFFFF; else -> 0x40FFFFFF }
+        setStroke(maxOf(1, Math.round(width * density)), color)
     } else null
 
     private var pressed = false
@@ -123,46 +172,68 @@ class KeyFaceDrawable(private val style: String, private val radius: Float, dens
     }
 
     override fun draw(canvas: Canvas) {
+        side?.draw(canvas)
         body.draw(canvas)
-        shade?.draw(canvas)
+        if (!(gradient && !pressed)) shade?.draw(canvas)
+        neonGlow?.draw(canvas)
+        dish?.draw(canvas)
         gloss?.draw(canvas)
         edge?.draw(canvas)
     }
 
-    override fun onBoundsChange(bounds: Rect) {
-        body.bounds = bounds
-        shade?.bounds = bounds
-        edge?.bounds = bounds
-        val inset = (bounds.width() * 0.07f).toInt()
-        val top = bounds.top + (bounds.height() * 0.06f).toInt()
-        gloss?.setBounds(bounds.left + inset, top, bounds.right - inset, top + (bounds.height() * 0.46f).toInt())
+    override fun onBoundsChange(bounds: Rect) = layout()
+
+    private fun layout() {
+        val b = bounds
+        // a keycap stands on its side, and the top moves down a little when pressed
+        val top = if (keycap && pressed) (sideHeight * 0.7f).toInt() else 0
+        val bottomGap = if (keycap) (if (pressed) (sideHeight * 0.3f).toInt() else sideHeight.toInt()) else 0
+        val face = Rect(b.left, b.top + top, b.right, b.bottom - bottomGap)
+        body.bounds = face
+        shade?.bounds = face
+        neonGlow?.bounds = face
+        edge?.bounds = face
+        side?.setBounds(b.left, b.top + sideHeight.toInt(), b.right, b.bottom)
+        dish?.setBounds(face.left + (face.width() * 0.07f).toInt(), face.top + (face.height() * 0.1f).toInt(),
+            face.right - (face.width() * 0.07f).toInt(), face.bottom - (face.height() * 0.14f).toInt())
+        val inset = (face.width() * 0.07f).toInt()
+        val glossTop = face.top + (face.height() * 0.06f).toInt()
+        gloss?.setBounds(face.left + inset, glossTop, face.right - inset, glossTop + (face.height() * 0.46f).toInt())
     }
 
     override fun isStateful() = true
 
     override fun onStateChange(state: IntArray): Boolean {
         pressed = state.contains(android.R.attr.state_pressed)
-        body.setState(state) // lets the tint pick the pressed color
+        if (!gradient) body.setState(state) // lets the tint pick the pressed color
         applyState()
+        layout()
         return true
     }
 
-    /** pressed: the dome flattens, the shine fades, glass becomes a little more solid */
+    /** pressed: the dome flattens, the shine fades, see-through keys become a little more solid */
     private fun applyState() {
         shade?.orientation = if (pressed) GradientDrawable.Orientation.BOTTOM_TOP else GradientDrawable.Orientation.TOP_BOTTOM
-        body.alpha = if (glass && pressed) minOf(255, alphaValue * 3 / 2) else alphaValue
+        body.alpha = when {
+            glass && pressed -> minOf(255, alphaValue * 3 / 2)
+            ghost -> if (pressed) alphaValue else alphaValue / 4
+            else -> alphaValue
+        }
         shade?.alpha = alphaValue
+        side?.alpha = alphaValue
         edge?.alpha = alphaValue
+        dish?.alpha = alphaValue
+        neonGlow?.alpha = alphaValue
         gloss?.alpha = alphaValue * (if (pressed) 35 else 100) / 100
     }
 
     override fun setTintList(tint: ColorStateList?) {
-        body.setTintList(tint)
+        if (!gradient) body.setTintList(tint)
         invalidateSelf()
     }
 
     override fun setTintMode(tintMode: PorterDuff.Mode?) {
-        body.setTintMode(tintMode)
+        if (!gradient) body.setTintMode(tintMode)
         invalidateSelf()
     }
 
@@ -175,7 +246,7 @@ class KeyFaceDrawable(private val style: String, private val radius: Float, dens
     override fun getAlpha() = alphaValue
 
     override fun setColorFilter(colorFilter: ColorFilter?) {
-        body.colorFilter = colorFilter
+        if (!gradient) body.colorFilter = colorFilter
         invalidateSelf()
     }
 

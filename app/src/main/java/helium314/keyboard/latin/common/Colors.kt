@@ -109,7 +109,9 @@ interface Colors {
         val style = KeyFace.style(prefs)
         if (style == KeyFace.THEME) return null
         val density = context.resources.displayMetrics.density
-        return KeyFaceDrawable(style, KeyFace.radiusPx(prefs, density), density)
+        return KeyFaceDrawable(style, KeyFace.radiusPx(prefs, density), density,
+            prefs.getInt(Settings.PREF_KEY_STYLE_COLOR_A, Defaults.PREF_KEY_STYLE_COLOR_A),
+            prefs.getInt(Settings.PREF_KEY_STYLE_COLOR_B, Defaults.PREF_KEY_STYLE_COLOR_B))
     }
 
     /** Draws the key outline from Appearance settings on top of [drawable]. Only for the keys on the
