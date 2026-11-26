@@ -395,7 +395,7 @@ public class KeyboardView extends View {
             }
             if (KeyLighting.REACTIVE.equals(mLight.style) || KeyLighting.RIPPLE.equals(mLight.style)) {
                 if (mLightPresses.size() >= 6) mLightPresses.remove(0);
-                mLightPresses.add(new LightPress(key, now));
+                mLightPresses.add(new LightPress(key, now, mLight.randomColor ? KeyLighting.randomColor(mLight) : 0));
             }
             postInvalidateOnAnimation();
         }
@@ -436,7 +436,8 @@ public class KeyboardView extends View {
     private static final class LightPress {
         final Key key;
         final long start;
-        LightPress(final Key key, final long start) { this.key = key; this.start = start; }
+        final int color; // 0: take the color from the key position
+        LightPress(final Key key, final long start, final int color) { this.key = key; this.start = start; this.color = color; }
     }
 
     /** After this long without touch the moving light stops and stays as it is, to save battery. */
@@ -488,13 +489,16 @@ public class KeyboardView extends View {
                 color = KeyLighting.colorAt(mLight, mLightT, x);
             } else if (reactive) {
                 float strength = 0f;
+                int pressColor = 0;
                 for (final LightPress press : mLightPresses) {
                     if (press.key != key) continue;
-                    strength = Math.max(strength, 1f - (now - press.start) / (float) fadeMs);
+                    final float s = 1f - (now - press.start) / (float) fadeMs;
+                    if (s > strength) { strength = s; pressColor = press.color; }
                 }
-                if (strength > 0.03f) color = KeyLighting.withAlpha(KeyLighting.colorForPress(mLight, x), strength);
+                if (strength > 0.03f) color = KeyLighting.withAlpha(pressColor != 0 ? pressColor : KeyLighting.colorForPress(mLight, x), strength);
             } else if (ripple) {
                 float strength = 0f;
+                int pressColor = 0;
                 final float speedPx = (120 + 60 * mLight.speed) * density; // px per second
                 final float band = 45 * density;
                 for (final LightPress press : mLightPresses) {
@@ -503,9 +507,10 @@ public class KeyboardView extends View {
                     final float dy = keyCenterY - (press.key.getY() + press.key.getHeight() / 2f + getPaddingTop());
                     final float off = ((float) Math.hypot(dx, dy) - elapsed * speedPx) / band;
                     final float fade = Math.max(0f, 1f - elapsed / 1.8f);
-                    strength = Math.max(strength, (float) Math.exp(-off * off) * fade);
+                    final float s = (float) Math.exp(-off * off) * fade;
+                    if (s > strength) { strength = s; pressColor = press.color; }
                 }
-                if (strength > 0.03f) color = KeyLighting.withAlpha(KeyLighting.colorForPress(mLight, x), strength);
+                if (strength > 0.03f) color = KeyLighting.withAlpha(pressColor != 0 ? pressColor : KeyLighting.colorForPress(mLight, x), strength);
             }
             if (Color.alpha(color) > 6) drawLightRing(canvas, key, color);
         }

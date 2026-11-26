@@ -37,6 +37,13 @@ import helium314.keyboard.settings.preferences.SliderPreference
 import helium314.keyboard.settings.preferences.SwitchPreference
 import helium314.keyboard.latin.utils.Theme
 import helium314.keyboard.settings.dialogs.ColorPickerDialog
+import helium314.keyboard.settings.dialogs.PaletteEditorDialog
+import helium314.keyboard.settings.dialogs.PaletteStrip
+import helium314.keyboard.latin.common.KeyPalette
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import helium314.keyboard.settings.dialogs.ColorThemePickerDialog
 import helium314.keyboard.settings.dialogs.CustomizeIconsDialog
 import helium314.keyboard.settings.initPreview
@@ -80,15 +87,13 @@ fun AppearanceScreen(
         if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)
             && prefs.getString(Settings.PREF_KEY_STYLE, Defaults.PREF_KEY_STYLE) != KeyFace.THEME) Settings.PREF_KEY_CORNER_RADIUS else null,
         if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)
-            && KeyFace.style(prefs).let { it == KeyFace.NEON || it == KeyFace.GRADIENT }) Settings.PREF_KEY_STYLE_COLOR_A else null,
+            && KeyFace.style(prefs) == KeyFace.NEON) Settings.PREF_KEY_STYLE_COLOR_A else null,
         if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)
-            && KeyFace.style(prefs) == KeyFace.GRADIENT) Settings.PREF_KEY_STYLE_COLOR_B else null,
+            && KeyFace.style(prefs) == KeyFace.GRADIENT) Settings.PREF_KEY_GRADIENT_PALETTE else null,
         Settings.PREF_KEY_LIGHT_PATTERN,
         if (KeyLighting.style(ctx) != KeyLighting.OFF) Settings.PREF_KEY_LIGHT_SPEED else null,
-        if (KeyLighting.style(ctx).let { it == KeyLighting.FLOW || it == KeyLighting.BREATHE || it == KeyLighting.REACTIVE || it == KeyLighting.RIPPLE })
-            Settings.PREF_KEY_LIGHT_COLOR_A else null,
-        if (KeyLighting.style(ctx).let { it == KeyLighting.FLOW || it == KeyLighting.REACTIVE || it == KeyLighting.RIPPLE })
-            Settings.PREF_KEY_LIGHT_COLOR_B else null,
+        if (KeyLighting.style(ctx) != KeyLighting.OFF) Settings.PREF_KEY_LIGHT_PALETTE else null,
+        if (KeyLighting.style(ctx).let { it == KeyLighting.REACTIVE || it == KeyLighting.RIPPLE }) Settings.PREF_KEY_LIGHT_RANDOM else null,
         if (KeyLighting.style(ctx) != KeyLighting.OFF) Settings.PREF_KEY_LIGHT_WIDTH else null,
         if (KeyLighting.style(ctx) != KeyLighting.OFF) Settings.PREF_KEY_LIGHT_GLOW else null,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
@@ -248,8 +253,8 @@ fun createAppearanceSettings(context: Context) = listOf(
     Setting(context, Settings.PREF_KEY_STYLE_COLOR_A, R.string.key_style_color_a) {
         KeyColorRow(it, Settings.PREF_KEY_STYLE_COLOR_A, Defaults.PREF_KEY_STYLE_COLOR_A)
     },
-    Setting(context, Settings.PREF_KEY_STYLE_COLOR_B, R.string.key_style_color_b) {
-        KeyColorRow(it, Settings.PREF_KEY_STYLE_COLOR_B, Defaults.PREF_KEY_STYLE_COLOR_B)
+    Setting(context, Settings.PREF_KEY_GRADIENT_PALETTE, R.string.key_gradient_palette) {
+        PaletteRow(it, Settings.PREF_KEY_GRADIENT_PALETTE)
     },
     Setting(context, Settings.PREF_KEY_LIGHT_PATTERN, R.string.key_light_pattern, R.string.key_light_pattern_summary) { setting ->
         val ctx = LocalContext.current
@@ -279,11 +284,11 @@ fun createAppearanceSettings(context: Context) = listOf(
             stepSize = 1,
         ) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
     },
-    Setting(context, Settings.PREF_KEY_LIGHT_COLOR_A, R.string.key_light_color_a) {
-        KeyColorRow(it, Settings.PREF_KEY_LIGHT_COLOR_A, Defaults.PREF_KEY_LIGHT_COLOR_A)
+    Setting(context, Settings.PREF_KEY_LIGHT_PALETTE, R.string.key_light_palette, R.string.key_light_palette_summary) {
+        PaletteRow(it, Settings.PREF_KEY_LIGHT_PALETTE)
     },
-    Setting(context, Settings.PREF_KEY_LIGHT_COLOR_B, R.string.key_light_color_b) {
-        KeyColorRow(it, Settings.PREF_KEY_LIGHT_COLOR_B, Defaults.PREF_KEY_LIGHT_COLOR_B)
+    Setting(context, Settings.PREF_KEY_LIGHT_RANDOM, R.string.key_light_random, R.string.key_light_random_summary) {
+        SwitchPreference(it, Defaults.PREF_KEY_LIGHT_RANDOM) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
     },
     Setting(context, Settings.PREF_KEY_LIGHT_WIDTH, R.string.key_light_width) { setting ->
         SliderPreference(
@@ -675,6 +680,32 @@ private fun KeyColorRow(setting: Setting, key: String, default: Int) {
             },
         ) { color ->
             prefs.edit { putInt(key, color) }
+            KeyboardSwitcher.getInstance().setThemeNeedsReload()
+        }
+}
+
+/** A row showing the palette stored under [key] as a color strip; opens the palette editor. */
+@Composable
+private fun PaletteRow(setting: Setting, key: String) {
+    val prefs = LocalContext.current.prefs()
+    var show by rememberSaveable { mutableStateOf(false) }
+    val colors = KeyPalette.load(prefs, key).toList()
+    Preference(
+        name = setting.title,
+        description = setting.description,
+        onClick = { show = true },
+        value = { PaletteStrip(colors, Modifier.width(96.dp).height(20.dp)) }
+    )
+    if (show)
+        PaletteEditorDialog(
+            onDismissRequest = { show = false },
+            title = setting.title,
+            initial = colors,
+            defaultColors = KeyPalette.DEFAULT.toList(),
+        ) { result ->
+            prefs.edit {
+                if (result == KeyPalette.DEFAULT.toList()) remove(key) else putString(key, KeyPalette.encode(result))
+            }
             KeyboardSwitcher.getInstance().setThemeNeedsReload()
         }
 }

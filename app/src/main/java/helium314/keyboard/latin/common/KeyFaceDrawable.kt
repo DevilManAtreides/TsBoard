@@ -102,7 +102,8 @@ class KeyFaceDrawable(
     private val radius: Float,
     density: Float,
     private val colorA: Int = 0xFF3DF2FF.toInt(),
-    private val colorB: Int = 0xFFFF4FD8.toInt(),
+    /** the colors of the gradient style, at least two */
+    private val gradientColors: IntArray = KeyPalette.DEFAULT,
 ) : Drawable() {
     private val glass = style == KeyFace.GLASS
     private val jelly = style == KeyFace.JELLY
@@ -120,7 +121,7 @@ class KeyFaceDrawable(
         when {
             gradient -> {
                 setOrientation(GradientDrawable.Orientation.TL_BR)
-                setColors(intArrayOf(colorA, colorB))
+                setColors(if (gradientColors.size >= 2) gradientColors else intArrayOf(gradientColors[0], gradientColors[0]))
             }
             glass -> setColor(0x73FFFFFF) // see-through before the theme color is applied
             neon -> setColor(0xD9FFFFFF.toInt())

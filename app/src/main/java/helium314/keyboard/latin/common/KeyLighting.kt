@@ -15,9 +15,9 @@ object KeyLighting {
     const val OFF = "off"
     /** a rainbow that moves across the keyboard */
     const val WAVE = "wave"
-    /** the two chosen colors slowly sliding across the keyboard */
+    /** the palette colors slowly sliding across the keyboard */
     const val FLOW = "flow"
-    /** all keys fade in and out in the first color */
+    /** all keys fade in and out while moving through the palette */
     const val BREATHE = "breathe"
     /** all keys change through the rainbow together */
     const val CYCLE = "cycle"
@@ -28,8 +28,12 @@ object KeyLighting {
 
     class Config(
         @JvmField val style: String,
-        @JvmField val colorA: Int,
-        @JvmField val colorB: Int,
+        /** the palette from Settings, at least one color */
+        @JvmField val colors: IntArray,
+        /** false if the user never changed the palette: the rainbow patterns then use the real rainbow */
+        @JvmField val customPalette: Boolean,
+        /** reactive and ripple pick a random palette color per press instead of using the key position */
+        @JvmField val randomColor: Boolean,
         /** 1..10 */
         @JvmField val speed: Float,
         @JvmField val widthPx: Float,
@@ -51,8 +55,9 @@ object KeyLighting {
         val density = context.resources.displayMetrics.density
         return Config(
             style,
-            prefs.getInt(Settings.PREF_KEY_LIGHT_COLOR_A, Defaults.PREF_KEY_LIGHT_COLOR_A),
-            prefs.getInt(Settings.PREF_KEY_LIGHT_COLOR_B, Defaults.PREF_KEY_LIGHT_COLOR_B),
+            KeyPalette.load(prefs, Settings.PREF_KEY_LIGHT_PALETTE),
+            KeyPalette.isCustom(prefs, Settings.PREF_KEY_LIGHT_PALETTE),
+            prefs.getBoolean(Settings.PREF_KEY_LIGHT_RANDOM, Defaults.PREF_KEY_LIGHT_RANDOM),
             prefs.getInt(Settings.PREF_KEY_LIGHT_SPEED, Defaults.PREF_KEY_LIGHT_SPEED).coerceIn(1, 10).toFloat(),
             prefs.getInt(Settings.PREF_KEY_LIGHT_WIDTH, Defaults.PREF_KEY_LIGHT_WIDTH).coerceAtLeast(1) * 0.5f * density,
             prefs.getInt(Settings.PREF_KEY_LIGHT_GLOW, Defaults.PREF_KEY_LIGHT_GLOW).coerceAtLeast(0) * density,
@@ -69,19 +74,26 @@ object KeyLighting {
      */
     @JvmStatic
     fun colorAt(config: Config, t: Float, x: Float): Int = when (config.style) {
-        WAVE -> rainbow(x * 360f + t * config.speed * 40f)
-        CYCLE -> rainbow(t * config.speed * 30f)
-        FLOW -> {
-            val mix = 0.5f + 0.5f * sin((2.0 * PI * (x - t * config.speed * 0.05f)).toFloat())
-            ColorUtils.blendARGB(config.colorA, config.colorB, mix)
-        }
-        BREATHE -> withAlpha(config.colorA, 0.2f + 0.8f * (0.5f + 0.5f * sin((2.0 * PI * t * config.speed * 0.1f).toFloat())))
-        else -> config.colorA
+        WAVE ->
+            if (config.customPalette) KeyPalette.at(config.colors, x - t * config.speed * 0.12f, true)
+            else rainbow(x * 360f + t * config.speed * 40f)
+        CYCLE ->
+            if (config.customPalette) KeyPalette.at(config.colors, t * config.speed * 0.05f, true)
+            else rainbow(t * config.speed * 30f)
+        FLOW -> KeyPalette.at(config.colors, x - t * config.speed * 0.04f, true)
+        BREATHE -> withAlpha(
+            KeyPalette.at(config.colors, t * config.speed * 0.02f, true),
+            0.2f + 0.8f * (0.5f + 0.5f * sin((2.0 * PI * t * config.speed * 0.1f).toFloat())))
+        else -> config.colors[0]
     }
 
-    /** Color for a key that was just pressed, from the first color to the second across the keyboard. */
+    /** Color for a key that was just pressed: from its place across the keyboard, along the palette. */
     @JvmStatic
-    fun colorForPress(config: Config, x: Float): Int = ColorUtils.blendARGB(config.colorA, config.colorB, x.coerceIn(0f, 1f))
+    fun colorForPress(config: Config, x: Float): Int = KeyPalette.at(config.colors, x, false)
+
+    /** A random palette color, for the "random color per press" option. */
+    @JvmStatic
+    fun randomColor(config: Config): Int = config.colors[(Math.random() * config.colors.size).toInt().coerceIn(0, config.colors.size - 1)]
 
     /** [color] with its opacity multiplied by [factor] (0..1). */
     @JvmStatic
