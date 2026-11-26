@@ -37,6 +37,8 @@ import helium314.keyboard.settings.preferences.SliderPreference
 import helium314.keyboard.settings.preferences.SwitchPreference
 import helium314.keyboard.latin.utils.Theme
 import helium314.keyboard.settings.dialogs.ColorPickerDialog
+import helium314.keyboard.settings.dialogs.ListPickerDialog
+import androidx.compose.material3.Text
 import helium314.keyboard.settings.dialogs.PaletteEditorDialog
 import helium314.keyboard.settings.dialogs.PaletteStrip
 import helium314.keyboard.latin.common.KeyPalette
@@ -67,53 +69,51 @@ fun AppearanceScreen(
     if ((b?.value ?: 0) < 0)
         Log.v("irrelevant", "stupid way to trigger recomposition on preference change")
     val dayNightMode = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && prefs.getBoolean(Settings.PREF_THEME_DAY_NIGHT, Defaults.PREF_THEME_DAY_NIGHT)
+    val borders = prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)
     val items = listOf(
-        R.string.settings_screen_theme,
+        R.string.appearance_cat_style,
         Settings.PREF_THEME_STYLE,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+            Settings.PREF_THEME_DAY_NIGHT else null,
+        Settings.PREF_THEME_COLORS,
+        if (dayNightMode) Settings.PREF_THEME_COLORS_NIGHT else null,
         Settings.PREF_ICON_STYLE,
         Settings.PREF_ACCENT_SHIFTED_ICON,
         Settings.PREF_CUSTOM_ICON_NAMES,
+        R.string.appearance_cat_keys,
         Settings.PREF_THEME_KEY_BORDERS,
-        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)) Settings.PREF_KEY_EDGE else null,
-        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)
-            && KeyFace.edge(prefs) == KeyFace.EDGE_OUTLINE) Settings.PREF_KEY_OUTLINE_WIDTH else null,
-        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)
-            && KeyFace.edge(prefs) == KeyFace.EDGE_OUTLINE) Settings.PREF_KEY_OUTLINE_COLOR else null,
-        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)
-            && KeyFace.edge(prefs) == KeyFace.EDGE_GLOW) Settings.PREF_KEY_GLOW_SIZE else null,
-        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)
-            && KeyFace.edge(prefs) == KeyFace.EDGE_GLOW) Settings.PREF_KEY_GLOW_COLOR else null,
-        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)) Settings.PREF_KEY_STYLE else null,
-        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)
-            && prefs.getString(Settings.PREF_KEY_STYLE, Defaults.PREF_KEY_STYLE) != KeyFace.THEME) Settings.PREF_KEY_CORNER_RADIUS else null,
-        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)
-            && KeyFace.style(prefs) == KeyFace.NEON) Settings.PREF_KEY_STYLE_COLOR_A else null,
-        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS)
-            && KeyFace.style(prefs) == KeyFace.GRADIENT) Settings.PREF_KEY_GRADIENT_PALETTE else null,
+        if (borders && prefs.getString(Settings.PREF_KEY_STYLE, Defaults.PREF_KEY_STYLE) != KeyFace.THEME) Settings.PREF_KEY_CORNER_RADIUS else null,
+        if (borders && KeyFace.style(prefs) == KeyFace.NEON) Settings.PREF_KEY_STYLE_COLOR_A else null,
+        if (borders && KeyFace.style(prefs) == KeyFace.GRADIENT) Settings.PREF_KEY_GRADIENT_PALETTE else null,
+        if (borders) Settings.PREF_KEY_EDGE else null,
+        if (borders && KeyFace.edge(prefs) == KeyFace.EDGE_OUTLINE) Settings.PREF_KEY_OUTLINE_WIDTH else null,
+        if (borders && KeyFace.edge(prefs) == KeyFace.EDGE_OUTLINE) Settings.PREF_KEY_OUTLINE_COLOR else null,
+        if (borders && KeyFace.edge(prefs) == KeyFace.EDGE_GLOW) Settings.PREF_KEY_GLOW_SIZE else null,
+        if (borders && KeyFace.edge(prefs) == KeyFace.EDGE_GLOW) Settings.PREF_KEY_GLOW_COLOR else null,
+        if (borders) Settings.PREF_KEY_GAP_SCALE_PREFIX else null,
+        R.string.appearance_cat_light,
         Settings.PREF_KEY_LIGHT_PATTERN,
         if (KeyLighting.style(ctx) != KeyLighting.OFF) Settings.PREF_KEY_LIGHT_SPEED else null,
         if (KeyLighting.style(ctx) != KeyLighting.OFF) Settings.PREF_KEY_LIGHT_PALETTE else null,
         if (KeyLighting.style(ctx).let { it == KeyLighting.REACTIVE || it == KeyLighting.RIPPLE }) Settings.PREF_KEY_LIGHT_RANDOM else null,
         if (KeyLighting.style(ctx) != KeyLighting.OFF) Settings.PREF_KEY_LIGHT_WIDTH else null,
         if (KeyLighting.style(ctx) != KeyLighting.OFF) Settings.PREF_KEY_LIGHT_GLOW else null,
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-            Settings.PREF_THEME_DAY_NIGHT else null,
-        Settings.PREF_THEME_COLORS,
-        if (dayNightMode) Settings.PREF_THEME_COLORS_NIGHT else null,
+        R.string.appearance_cat_effects,
         Settings.PREF_KEY_PRESS_ANIM,
         if (KeyPressAnimation.style(ctx) == KeyPressAnimation.PULSE || KeyPressAnimation.style(ctx) == KeyPressAnimation.GLOW)
             Settings.PREF_KEY_ANIM_COLOR else null,
         if (KeyPressAnimation.style(ctx) == KeyPressAnimation.PULSE || KeyPressAnimation.style(ctx) == KeyPressAnimation.GLOW)
             Settings.PREF_KEY_ANIM_SIZE else null,
         if (KeyPressAnimation.style(ctx) != KeyPressAnimation.NONE) Settings.PREF_KEY_ANIM_SPEED else null,
-        Settings.PREF_NAVBAR_COLOR,
-        Settings.PREF_NAVBAR_BLACK,
+        R.string.appearance_cat_background,
         SettingsWithoutKey.BACKGROUND_IMAGE,
         SettingsWithoutKey.BACKGROUND_IMAGE_LANDSCAPE,
         Settings.PREF_BACKGROUND_BLUR,
         Settings.PREF_BACKGROUND_DIM,
         Settings.PREF_BACKGROUND_KEY_OPACITY,
-        R.string.settings_category_miscellaneous,
+        Settings.PREF_NAVBAR_COLOR,
+        Settings.PREF_NAVBAR_BLACK,
+        R.string.appearance_cat_layout,
         Settings.PREF_ENABLE_SPLIT_KEYBOARD,
         if (prefs.getBoolean(Settings.PREF_ENABLE_SPLIT_KEYBOARD_LANDSCAPE, Defaults.PREF_ENABLE_SPLIT_KEYBOARD)
             || prefs.getBoolean(Settings.PREF_ENABLE_SPLIT_KEYBOARD, Defaults.PREF_ENABLE_SPLIT_KEYBOARD)
@@ -121,12 +121,11 @@ fun AppearanceScreen(
             || prefs.getBoolean(Settings.PREF_ENABLE_SPLIT_KEYBOARD_FOLDED_LANDSCAPE, Defaults.PREF_ENABLE_SPLIT_KEYBOARD)
             )
             Settings.PREF_SPLIT_SPACER_SCALE_PREFIX else null,
-        if (prefs.getBoolean(Settings.PREF_THEME_KEY_BORDERS, Defaults.PREF_THEME_KEY_BORDERS))
-            Settings.PREF_KEY_GAP_SCALE_PREFIX else null,
         Settings.PREF_KEYBOARD_HEIGHT_SCALE_PREFIX,
         Settings.PREF_BOTTOM_ROW_SCALE_PREFIX,
         Settings.PREF_BOTTOM_PADDING_SCALE_PREFIX,
         Settings.PREF_SIDE_PADDING_SCALE_PREFIX,
+        R.string.appearance_cat_text,
         Settings.PREF_SPACE_BAR_TEXT,
         SettingsWithoutKey.CUSTOM_FONT,
         Settings.PREF_FONT_SCALE,
@@ -146,26 +145,57 @@ fun AppearanceScreen(
 }
 
 fun createAppearanceSettings(context: Context) = listOf(
-    Setting(context, Settings.PREF_THEME_STYLE, R.string.theme_style) { setting ->
+    Setting(context, Settings.PREF_THEME_STYLE, R.string.keyboard_style) { setting ->
         val ctx = LocalContext.current
         val prefs = ctx.prefs()
-        val items = KeyboardTheme.STYLES.map {
-            it.getStringResourceOrName("style_name_", ctx) to it
-        }
-        ListPreference(
-            setting,
-            items,
-            Defaults.PREF_THEME_STYLE
-        ) {
-            if (it != KeyboardTheme.STYLE_HOLO) {
-                if (prefs.getString(Settings.PREF_THEME_COLORS, Defaults.PREF_THEME_COLORS) == KeyboardTheme.THEME_HOLO_WHITE)
-                    prefs.edit { remove(Settings.PREF_THEME_COLORS) }
-                if (prefs.getString(Settings.PREF_THEME_COLORS_NIGHT, Defaults.PREF_THEME_COLORS_NIGHT) == KeyboardTheme.THEME_HOLO_WHITE)
-                    prefs.edit { remove(Settings.PREF_THEME_COLORS_NIGHT) }
-            }
-            KeyboardIconsSet.needsReload = true // only relevant for Settings.PREF_CUSTOM_ICON_NAMES
-            KeyboardSwitcher.getInstance().setThemeNeedsReload()
-        }
+        val b = (ctx.getActivity() as? SettingsActivity)?.prefChanged?.collectAsState()
+        if ((b?.value ?: 0) < 0)
+            Log.v("irrelevant", "stupid way to trigger recomposition on preference change")
+        // one list for the built-in looks (prefix "t:") and the key styles (prefix "k:")
+        val items = KeyboardTheme.STYLES.map { it.getStringResourceOrName("style_name_", ctx) to "t:$it" } + listOf(
+            ctx.getString(R.string.key_style_flat) to "k:${KeyFace.FLAT}",
+            ctx.getString(R.string.key_style_jelly) to "k:${KeyFace.JELLY}",
+            ctx.getString(R.string.key_style_glass) to "k:${KeyFace.GLASS}",
+            ctx.getString(R.string.key_style_keycap) to "k:${KeyFace.KEYCAP}",
+            ctx.getString(R.string.key_style_neon) to "k:${KeyFace.NEON}",
+            ctx.getString(R.string.key_style_ghost) to "k:${KeyFace.GHOST}",
+            ctx.getString(R.string.key_style_gradient) to "k:${KeyFace.GRADIENT}",
+        )
+        val keyStyle = KeyFace.style(prefs)
+        val current = if (keyStyle != KeyFace.THEME) "k:$keyStyle"
+            else "t:" + prefs.getString(Settings.PREF_THEME_STYLE, Defaults.PREF_THEME_STYLE)
+        val selected = items.firstOrNull { it.second == current }
+        var showDialog by rememberSaveable { mutableStateOf(false) }
+        Preference(name = setting.title, description = selected?.first, onClick = { showDialog = true })
+        if (showDialog)
+            ListPickerDialog(
+                onDismissRequest = { showDialog = false },
+                items = items,
+                onItemSelected = { item ->
+                    if (item.second == current) return@ListPickerDialog
+                    if (item.second.startsWith("k:")) {
+                        prefs.edit { putString(Settings.PREF_KEY_STYLE, item.second.substring(2)) }
+                    } else {
+                        val style = item.second.substring(2)
+                        prefs.edit {
+                            putString(Settings.PREF_THEME_STYLE, style)
+                            remove(Settings.PREF_KEY_STYLE)
+                        }
+                        if (style != KeyboardTheme.STYLE_HOLO) {
+                            if (prefs.getString(Settings.PREF_THEME_COLORS, Defaults.PREF_THEME_COLORS) == KeyboardTheme.THEME_HOLO_WHITE)
+                                prefs.edit { remove(Settings.PREF_THEME_COLORS) }
+                            if (prefs.getString(Settings.PREF_THEME_COLORS_NIGHT, Defaults.PREF_THEME_COLORS_NIGHT) == KeyboardTheme.THEME_HOLO_WHITE)
+                                prefs.edit { remove(Settings.PREF_THEME_COLORS_NIGHT) }
+                        }
+                    }
+                    KeyboardIconsSet.needsReload = true // only relevant for Settings.PREF_CUSTOM_ICON_NAMES
+                    KeyboardSwitcher.getInstance().setThemeNeedsReload()
+                },
+                title = { Text(setting.title) },
+                selectedItem = selected,
+                getItemName = { it.first },
+                description = ctx.getString(R.string.keyboard_style_summary),
+            )
     },
     Setting(context, Settings.PREF_ICON_STYLE, R.string.icon_style) { setting ->
         val ctx = LocalContext.current

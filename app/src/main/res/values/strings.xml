@@ -753,6 +753,15 @@ New dictionary:
     <string name="key_glow_size">Glow size</string>
     <string name="key_glow_color">Glow color</string>
     <string name="key_glow_color_summary">The opacity bar sets how bright the glow is</string>
+    <string name="keyboard_style">Keyboard style</string>
+    <string name="keyboard_style_summary">Material, Holo and Rounded are the built-in looks. The others are key styles and need "Key borders" turned on.</string>
+    <string name="appearance_cat_style">Style &amp; colors</string>
+    <string name="appearance_cat_keys">Keys</string>
+    <string name="appearance_cat_light">Key light (RGB)</string>
+    <string name="appearance_cat_effects">Press effects</string>
+    <string name="appearance_cat_background">Background &amp; navigation bar</string>
+    <string name="appearance_cat_layout">Size &amp; layout</string>
+    <string name="appearance_cat_text">Text, fonts &amp; emoji</string>
     <string name="key_style">Key style</string>
     <string name="key_style_theme">Theme default</string>
     <string name="key_style_flat">Flat</string>
