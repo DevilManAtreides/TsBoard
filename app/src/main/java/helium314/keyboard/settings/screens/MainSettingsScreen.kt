@@ -43,6 +43,7 @@ fun MainSettingsScreen(
     onClickLanguage: () -> Unit,
     onClickLayouts: () -> Unit,
     onClickDictionaries: () -> Unit,
+    onClickProfiles: () -> Unit,
     onClickBack: () -> Unit,
 ) {
     SearchSettingsScreen(
@@ -55,6 +56,7 @@ fun MainSettingsScreen(
             Column(
                 Modifier.verticalScroll(rememberScrollState()).then(Modifier.padding(innerPadding))
             ) {
+                ProfileEditBanner()
                 Preference(
                     name = stringResource(R.string.language_and_layouts_title),
                     description = enabledSubtypes.joinToString(", ") { it.displayName() },
@@ -114,6 +116,13 @@ fun MainSettingsScreen(
                     iconColor = Color(0xFFEF4444)
                 ) { NextScreenIcon() }
                 Preference(
+                    name = stringResource(R.string.settings_screen_profiles),
+                    description = stringResource(R.string.settings_screen_profiles_summary),
+                    onClick = onClickProfiles,
+                    icon = R.drawable.ic_settings_layout,
+                    iconColor = Color(0xFFF97316)
+                ) { NextScreenIcon() }
+                Preference(
                     name = stringResource(R.string.settings_screen_advanced),
                     onClick = onClickAdvanced,
                     icon = R.drawable.ic_settings_advanced,
@@ -136,7 +145,7 @@ private fun PreviewScreen() {
     initPreview(LocalContext.current)
     Theme(previewDark) {
         Surface {
-            MainSettingsScreen({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
+            MainSettingsScreen({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
         }
     }
 }

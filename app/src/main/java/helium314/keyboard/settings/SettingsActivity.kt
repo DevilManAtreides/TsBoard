@@ -39,6 +39,7 @@ import helium314.keyboard.latin.common.FileUtils
 import helium314.keyboard.latin.define.DebugFlags
 import helium314.keyboard.latin.dictionary.cleanUnusedMainDicts
 import helium314.keyboard.latin.settings.Settings
+import helium314.keyboard.latin.utils.AppProfiles
 import helium314.keyboard.latin.utils.BackButton
 import helium314.keyboard.latin.utils.DeviceProtectedUtils
 import helium314.keyboard.latin.utils.GestureDataGatheringSettings
@@ -76,6 +77,7 @@ open class SettingsActivity : ComponentActivity(), SharedPreferences.OnSharedPre
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val ctx: Context = this
+        AppProfiles.revertActive(ctx) // changes in settings are for the normal settings, not for an app profile
         val cvDeferred = lifecycleScope.async(Dispatchers.Default) { ComposeView(context = ctx) }
         val jobs = mutableListOf(
             lifecycleScope.launch(Dispatchers.Default) { settingsContainer = SettingsContainer(ctx) },

@@ -33,6 +33,7 @@ import helium314.keyboard.latin.RichInputMethodSubtype;
 import helium314.keyboard.latin.common.BackgroundEffects;
 import helium314.keyboard.latin.common.StringUtils;
 import helium314.keyboard.latin.suggestions.PunctuationSuggestions;
+import helium314.keyboard.latin.utils.AppProfiles;
 import helium314.keyboard.latin.utils.DeviceProtectedUtils;
 import helium314.keyboard.latin.utils.FoldableUtils;
 import helium314.keyboard.latin.utils.KtxKt;
@@ -616,9 +617,14 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
     }
 
     public RichInputMethodSubtype getSubtypeForApp(String packageName) {
-        if (! isSubtypePerApp() || StringUtils.isEmpty(packageName)) return null;
-        var subtypePref = mPrefs.getString(PREF_SAVED_APP_SUBTYPE_PREFIX + packageName, null);
-        if (subtypePref == null) return null;
+        if (StringUtils.isEmpty(packageName)) return null;
+        // a layout assigned in an app profile wins over the remembered one
+        String subtypePref = AppProfiles.subtypeFor(mPrefs, packageName);
+        if (subtypePref == null) {
+            if (!isSubtypePerApp()) return null;
+            subtypePref = mPrefs.getString(PREF_SAVED_APP_SUBTYPE_PREFIX + packageName, null);
+            if (subtypePref == null) return null;
+        }
         var settingsSubtype = SettingsSubtype.Companion.toSettingsSubtype(subtypePref);
         var subtype = settingsSubtype.toEnabledSubtype();
         if (subtype == null) subtype = RichInputMethodManager.getInstance().findSubtypeForHintLocale(settingsSubtype.getLocale());
