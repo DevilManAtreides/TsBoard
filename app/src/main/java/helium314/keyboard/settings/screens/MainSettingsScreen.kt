@@ -3,6 +3,7 @@ package helium314.keyboard.settings.screens
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -58,60 +59,71 @@ fun MainSettingsScreen(
                     name = stringResource(R.string.language_and_layouts_title),
                     description = enabledSubtypes.joinToString(", ") { it.displayName() },
                     onClick = onClickLanguage,
-                    icon = R.drawable.ic_settings_languages
+                    icon = R.drawable.ic_settings_languages,
+                    iconColor = Color(0xFF3B82F6)
                 ) { NextScreenIcon() }
                 Preference(
                     name = stringResource(R.string.settings_screen_preferences),
                     onClick = onClickPreferences,
-                    icon = R.drawable.ic_settings_preferences
+                    icon = R.drawable.ic_settings_preferences,
+                    iconColor = Color(0xFF14B8A6)
                 ) { NextScreenIcon() }
                 Preference(
                     name = stringResource(R.string.settings_screen_appearance),
                     onClick = onClickAppearance,
-                    icon = R.drawable.ic_settings_appearance
+                    icon = R.drawable.ic_settings_appearance,
+                    iconColor = Color(0xFFEC4899)
                 ) { NextScreenIcon() }
                 Preference(
                     name = stringResource(R.string.settings_screen_toolbar),
                     onClick = onClickToolbar,
-                    icon = R.drawable.ic_settings_toolbar
+                    icon = R.drawable.ic_settings_toolbar,
+                    iconColor = Color(0xFFF59E0B)
                 ) { NextScreenIcon() }
                 if (JniUtils.sHaveGestureLib)
                     Preference(
                         name = stringResource(R.string.settings_screen_gesture),
                         onClick = onClickGestureTyping,
-                        icon = R.drawable.ic_settings_gesture
+                        icon = R.drawable.ic_settings_gesture,
+                    iconColor = Color(0xFF8B5CF6)
                     ) { NextScreenIcon() }
                 // we don't even show the menu if data gathering phase ended more than 2 weeks ago
                 if (JniUtils.sHaveGestureLib && System.currentTimeMillis() < END_DATE_EPOCH_MILLIS + TWO_WEEKS_IN_MILLIS)
                     Preference(
                         name = stringResource(R.string.gesture_data_screen),
                         onClick = onClickDataGathering,
-                        icon = R.drawable.ic_settings_gesture
+                        icon = R.drawable.ic_settings_gesture,
+                    iconColor = Color(0xFF8B5CF6)
                     ) { NextScreenIcon() }
                 Preference(
                     name = stringResource(R.string.settings_screen_correction),
                     onClick = onClickTextCorrection,
-                    icon = R.drawable.ic_settings_correction
+                    icon = R.drawable.ic_settings_correction,
+                    iconColor = Color(0xFF22C55E)
                 ) { NextScreenIcon() }
                 Preference(
                     name = stringResource(R.string.settings_screen_secondary_layouts),
                     onClick = onClickLayouts,
-                    icon = R.drawable.ic_settings_layout
+                    icon = R.drawable.ic_settings_layout,
+                    iconColor = Color(0xFF6366F1)
                 ) { NextScreenIcon() }
                 Preference(
                     name = stringResource(R.string.dictionary_settings_category),
                     onClick = onClickDictionaries,
-                    icon = R.drawable.ic_dictionary
+                    icon = R.drawable.ic_dictionary,
+                    iconColor = Color(0xFFEF4444)
                 ) { NextScreenIcon() }
                 Preference(
                     name = stringResource(R.string.settings_screen_advanced),
                     onClick = onClickAdvanced,
-                    icon = R.drawable.ic_settings_advanced
+                    icon = R.drawable.ic_settings_advanced,
+                    iconColor = Color(0xFF64748B)
                 ) { NextScreenIcon() }
                 Preference(
                     name = stringResource(R.string.settings_screen_about),
                     onClick = onClickAbout,
-                    icon = R.drawable.ic_settings_about
+                    icon = R.drawable.ic_settings_about,
+                    iconColor = Color(0xFF0EA5E9)
                 ) { NextScreenIcon() }
             }
         }

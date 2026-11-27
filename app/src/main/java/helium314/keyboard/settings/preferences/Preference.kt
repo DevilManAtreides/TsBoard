@@ -2,7 +2,15 @@
 package helium314.keyboard.settings.preferences
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -44,9 +52,25 @@ fun PreferenceCategory(
         Text(
             text = title,
             modifier = modifier.padding(top = 12.dp, start = 16.dp, end = 8.dp, bottom = 8.dp),
-            color = MaterialTheme.colorScheme.secondary,
-            style = MaterialTheme.typography.titleSmall
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.titleLarge
         )
+    }
+}
+
+/** An icon in white on a rounded, slightly shaded tile of [color]. */
+@Composable
+fun IconTile(@DrawableRes icon: Int, name: String, color: Color) {
+    Box(
+        Modifier
+            .size(40.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(Brush.linearGradient(listOf(lerp(color, Color.White, 0.18f), lerp(color, Color.Black, 0.22f)))),
+        contentAlignment = Alignment.Center
+    ) {
+        CompositionLocalProvider(LocalContentColor provides Color.White) {
+            IconOrImage(icon, name, 24)
+        }
     }
 }
 
@@ -57,6 +81,8 @@ fun Preference(
     modifier: Modifier = Modifier,
     description: String? = null,
     @DrawableRes icon: Int? = null,
+    /** if set, the icon is shown white on a rounded tile of this color */
+    iconColor: Color? = null,
     value: @Composable (RowScope.() -> Unit)? = null,
 ) {
     Row(
@@ -68,8 +94,10 @@ fun Preference(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (icon != null)
-            IconOrImage(icon, name, 32)
+        if (icon != null) {
+            if (iconColor != null) IconTile(icon, name, iconColor)
+            else IconOrImage(icon, name, 32)
+        }
         Column(modifier = Modifier.weight(1f)) {
             Text(text = name, style = MaterialTheme.typography.bodyLarge)
             if (description != null) {
