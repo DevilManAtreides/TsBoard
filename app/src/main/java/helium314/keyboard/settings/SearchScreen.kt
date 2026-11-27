@@ -59,7 +59,8 @@ fun SearchSettingsScreen(
     onClickBack: () -> Unit,
     title: String,
     settings: List<Any?>,
-    content: @Composable (ColumnScope.() -> Unit)? = null // overrides settings if not null
+    content: @Composable (ColumnScope.() -> Unit)? = null, // overrides settings if not null
+    stickyContent: @Composable (() -> Unit)? = null // stays at the top while the settings scroll
 ) {
     SearchScreen(
         onClickBack = onClickBack,
@@ -70,9 +71,9 @@ fun SearchSettingsScreen(
                 Scaffold(
                     contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)
                 ) { innerPadding ->
-                    Column(
-                        Modifier.verticalScroll(rememberScrollState()).then(Modifier.padding(innerPadding))
-                    ) {
+                    Column(Modifier.padding(innerPadding)) {
+                        stickyContent?.invoke()
+                        Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
                         settings.forEach {
                             if (it is Int) {
                                 PreferenceCategory(stringResource(it))
@@ -84,6 +85,7 @@ fun SearchSettingsScreen(
                                         SettingsActivity.settingsContainer[it]?.Preference()
                                 }
                             }
+                        }
                         }
                     }
                     // lazyColumn has janky scroll for a while (not sure why compose gets smoother after a while)

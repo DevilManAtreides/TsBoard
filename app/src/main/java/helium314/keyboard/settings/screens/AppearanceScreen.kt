@@ -31,6 +31,7 @@ import helium314.keyboard.settings.preferences.ListPreference
 import helium314.keyboard.settings.SettingsWithoutKey
 import helium314.keyboard.settings.Setting
 import helium314.keyboard.settings.preferences.Preference
+import helium314.keyboard.settings.KeyboardLivePreview
 import helium314.keyboard.settings.SearchSettingsScreen
 import helium314.keyboard.settings.SettingsActivity
 import helium314.keyboard.settings.preferences.SliderPreference
@@ -140,7 +141,8 @@ fun AppearanceScreen(
     SearchSettingsScreen(
         onClickBack = onClickBack,
         title = stringResource(R.string.settings_screen_appearance),
-        settings = items
+        settings = items,
+        stickyContent = { KeyboardLivePreview() }
     )
 }
 

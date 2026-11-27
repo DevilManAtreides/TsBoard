@@ -382,6 +382,23 @@ public class KeyboardView extends View {
         mEffectsEnabled = true;
     }
 
+    /** For the settings preview: shows key light and press animations, touches are handled by the caller. */
+    public void enablePreviewEffects() {
+        enableKeyEffects();
+    }
+
+    public void previewPress(@NonNull final Key key) {
+        key.onPressed();
+        invalidateKey(key);
+        startKeyAnimation(key);
+    }
+
+    public void previewRelease(@NonNull final Key key) {
+        key.onReleased();
+        invalidateKey(key);
+        releaseKeyAnimation(key);
+    }
+
     protected void startKeyAnimation(@NonNull final Key key) {
         // the software drawing path only redraws the key itself, which does not work for effects around it
         if (!isHardwareAccelerated()) return;

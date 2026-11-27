@@ -755,6 +755,9 @@ New dictionary:
     <string name="key_glow_color_summary">The opacity bar sets how bright the glow is</string>
     <string name="terminal_words_dict">Terminal and code words</string>
     <string name="terminal_words_dict_summary">Suggests shell commands, tools and programming words, predicts the next word after commands like git or pkg, and stops autocorrect from changing them. Use it with App profiles to turn it on only in terminal apps.</string>
+    <string name="live_preview">Live preview (tap the keys to try animations)</string>
+    <string name="live_preview_hide">Hide</string>
+    <string name="live_preview_show">Show</string>
     <string name="settings_screen_profiles">App profiles</string>
     <string name="settings_screen_profiles_summary">A different look, layout and settings for each app</string>
     <string name="profiles_intro">A profile changes any settings you like while you type in the apps you give it. Everything else stays as in your normal settings.</string>
