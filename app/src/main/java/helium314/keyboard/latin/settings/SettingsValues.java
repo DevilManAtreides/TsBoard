@@ -311,7 +311,9 @@ public class SettingsValues {
         mPopupKeyHintOrder = SubtypeUtilsKt.getPopupKeyHintOrder(selectedSubtype, prefs);
         mAddToPersonalDictionary = prefs.getBoolean(Settings.PREF_ADD_TO_PERSONAL_DICTIONARY, Defaults.PREF_ADD_TO_PERSONAL_DICTIONARY);
         mUseContactsDictionary = SettingsValues.readUseContactsEnabled(prefs, context);
-        mUseAppsDictionary = prefs.getBoolean(Settings.PREF_USE_APPS, Defaults.PREF_USE_APPS);
+        // the apps dictionary also holds the terminal and code words
+        mUseAppsDictionary = prefs.getBoolean(Settings.PREF_USE_APPS, Defaults.PREF_USE_APPS)
+                || prefs.getBoolean(Settings.PREF_TERMINAL_WORDS, Defaults.PREF_TERMINAL_WORDS);
         mCustomNavBarColor = prefs.getBoolean(Settings.PREF_NAVBAR_COLOR, Defaults.PREF_NAVBAR_COLOR);
         mBlackNavBar = prefs.getBoolean(Settings.PREF_NAVBAR_BLACK, Defaults.PREF_NAVBAR_BLACK);
         mKeyGapScale = Settings.readKeyGapScale(prefs, isLandscape, isFolded);

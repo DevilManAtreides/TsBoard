@@ -3,11 +3,20 @@
 package helium314.keyboard.latin.dictionary;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 
 import com.android.inputmethod.latin.BinaryDictionary;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+import helium314.keyboard.latin.R;
+import helium314.keyboard.latin.settings.Defaults;
+import helium314.keyboard.latin.settings.Settings;
+import helium314.keyboard.latin.utils.KtxKt;
 import helium314.keyboard.latin.NgramContext;
 import helium314.keyboard.latin.common.StringUtils;
 import helium314.keyboard.latin.utils.AppsUtils;
@@ -22,6 +31,8 @@ public class AppsBinaryDictionary extends ExpandableBinaryDictionary {
 
     private static final int FREQUENCY_FOR_APPS = 100;
     private static final int FREQUENCY_FOR_APPS_BIGRAM = 200;
+    private static final int FREQUENCY_FOR_TERMINAL = 110;
+    private static final int FREQUENCY_FOR_TERMINAL_BIGRAM = 200;
 
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_DUMP = false;
@@ -56,15 +67,36 @@ public class AppsBinaryDictionary extends ExpandableBinaryDictionary {
      * Loads app names to the dictionary.
      */
     private void loadDictionaryLocked() {
-        for (String name : AppsUtils.INSTANCE.getNames(mPackageManager)) {
-            addNameLocked(name);
+        final SharedPreferences prefs = KtxKt.prefs(mContext);
+        if (prefs.getBoolean(Settings.PREF_USE_APPS, Defaults.PREF_USE_APPS)) {
+            for (String name : AppsUtils.INSTANCE.getNames(mPackageManager)) {
+                addNameLocked(name, FREQUENCY_FOR_APPS, FREQUENCY_FOR_APPS_BIGRAM);
+            }
+        }
+        if (prefs.getBoolean(Settings.PREF_TERMINAL_WORDS, Defaults.PREF_TERMINAL_WORDS)) {
+            loadTerminalWordsLocked();
+        }
+    }
+
+    /** Loads the bundled shell command, tool and programming words, one phrase per line. */
+    private void loadTerminalWordsLocked() {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                mContext.getResources().openRawResource(R.raw.terminal_words), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty() || line.startsWith("#")) continue;
+                addNameLocked(line, FREQUENCY_FOR_TERMINAL, FREQUENCY_FOR_TERMINAL_BIGRAM);
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Could not read terminal words", e);
         }
     }
 
     /**
      * Adds the words in an app label to the binary dictionary along with their n-grams.
      */
-    private void addNameLocked(final String appLabel) {
+    private void addNameLocked(final String appLabel, final int frequency, final int bigramFrequency) {
         NgramContext ngramContext = NgramContext.getEmptyPrevWordsContext(
                 BinaryDictionary.MAX_PREV_WORD_COUNT_FOR_N_GRAM);
         // TODO: Better tokenization for non-Latin writing systems
@@ -79,7 +111,7 @@ public class AppsBinaryDictionary extends ExpandableBinaryDictionary {
                     Log.d(TAG, "addName " + appLabel + ", " + word + ", "  + ngramContext);
                 }
                 runGCIfRequiredLocked(true /* mindsBlockByGC */);
-                addUnigramLocked(word, FREQUENCY_FOR_APPS,
+                addUnigramLocked(word, frequency,
                         null /* shortcut */, 0 /* shortcutFreq */, false /* isNotAWord */,
                         false /* isPossiblyOffensive */,
                         BinaryDictionary.NOT_A_VALID_TIMESTAMP);
@@ -87,7 +119,7 @@ public class AppsBinaryDictionary extends ExpandableBinaryDictionary {
                     runGCIfRequiredLocked(true /* mindsBlockByGC */);
                     addNgramEntryLocked(ngramContext,
                             word,
-                            FREQUENCY_FOR_APPS_BIGRAM,
+                            bigramFrequency,
                             BinaryDictionary.NOT_A_VALID_TIMESTAMP);
                 }
                 ngramContext = ngramContext.getNextNgramContext(

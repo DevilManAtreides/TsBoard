@@ -1,0 +1,483 @@
+# Words for terminal and code suggestions. One line is one phrase: the words are added to the dictionary
+# and each word predicts the next one in its line. Lines starting with # are ignored.
+# files and folders
+ls cd pwd cat grep sed awk find chmod chown mkdir rmdir touch cp mv rm ln stat file tree which whereis
+ls la
+cd home
+cd storage
+cd downloads
+mkdir parents
+rm rf
+cp r
+chmod plus x
+chmod 755
+chmod 644
+cat readme
+find name
+grep r
+grep i
+# text and streams
+echo head tail sort uniq wc diff patch tee xargs cut tr less more nl paste join column jq yq
+sort n
+sort r
+tail f
+head n
+wc l
+xargs n
+# system
+ps top htop kill pkill killall df du free uname whoami hostname uptime lsblk lsof dmesg env export unset alias unalias source history clear exit logout reboot shutdown sudo su doas passwd chroot
+sudo su
+sudo reboot
+sudo shutdown now
+sudo rm
+sudo nano
+sudo vim
+df h
+du sh
+ps aux
+kill 9
+# network
+curl wget ssh scp sftp rsync ping traceroute nslookup dig netstat ifconfig ip nmap telnet nc openssl
+ssh keygen
+ssh copy id
+ssh add
+ip addr
+ip route
+curl fsSL
+curl o
+wget c
+ping c
+# archives
+tar zip unzip gzip gunzip bzip2 xz zstd 7z
+tar xvf
+tar czvf
+tar xzvf
+tar tf
+unzip d
+# editors and sessions
+nano vim vi nvim emacs micro tmux screen byobu
+tmux new
+tmux attach
+tmux ls
+tmux kill session
+# build tools
+make cmake ninja gcc clang cc g++ ld gdb valgrind strace ltrace pkgconfig
+make install
+make clean
+make all
+cmake build
+# git
+git status
+git add
+git add all
+git commit
+git commit message
+git commit amend
+git push
+git push origin main
+git push origin master
+git push force
+git pull
+git pull rebase
+git fetch
+git fetch all
+git clone
+git checkout
+git checkout b
+git switch
+git switch c
+git branch
+git branch d
+git merge
+git rebase
+git rebase interactive
+git log
+git log oneline
+git diff
+git diff staged
+git stash
+git stash pop
+git stash list
+git reset
+git reset hard
+git reset soft
+git restore
+git restore staged
+git remote
+git remote add origin
+git remote add upstream
+git remote v
+git tag
+git init
+git show
+git blame
+git cherry pick
+git config global user name
+git config global user email
+git submodule update init
+git apply
+git format patch
+git am
+git revert
+git clean
+# termux and packages
+pkg install
+pkg uninstall
+pkg update
+pkg upgrade
+pkg search
+pkg list installed
+pkg show
+pkg files
+pkg autoclean
+apt update
+apt upgrade
+apt install
+apt remove
+apt search
+apt autoremove
+apt list
+sudo apt update
+sudo apt upgrade
+sudo apt install
+sudo apt remove
+dpkg install
+dpkg list
+yum install
+dnf install
+pacman sync
+apk add
+brew install
+brew update
+termux setup storage
+termux change repo
+termux battery status
+termux clipboard get
+termux clipboard set
+termux notification
+termux open
+termux open url
+termux share
+termux toast
+termux vibrate
+termux wake lock
+termux wake unlock
+termux api
+termux tts speak
+termux camera photo
+termux location
+termux sensor
+termux wifi connectioninfo
+termux fix shebang
+termux reload settings
+proot distro install
+proot distro login
+proot distro list
+proot distro remove
+# python
+python python3 pip pip3 pipx venv virtualenv conda pytest ipython jupyter uv poetry
+python m
+python m venv
+python m pip install
+python m http server
+python manage runserver
+python manage migrate
+python manage makemigrations
+pip install
+pip install r requirements
+pip uninstall
+pip list
+pip freeze
+pip show
+pip install upgrade
+source venv bin activate
+pytest k
+# javascript and node
+node npm npx yarn pnpm bun deno tsc eslint prettier webpack vite
+npm install
+npm install save dev
+npm uninstall
+npm run
+npm run build
+npm run dev
+npm run start
+npm run test
+npm start
+npm test
+npm init
+npm publish
+npm update
+npm audit fix
+npx create react app
+npx create next app
+yarn add
+yarn install
+yarn dev
+yarn build
+pnpm install
+pnpm add
+pnpm dev
+# other languages
+cargo rustc rustup go java javac kotlin kotlinc gradle gradlew mvn ruby gem bundle rake php composer perl lua dotnet swift
+cargo new
+cargo build
+cargo build release
+cargo run
+cargo test
+cargo check
+cargo add
+cargo install
+cargo clippy
+cargo fmt
+rustup update
+rustup install
+go run
+go build
+go test
+go mod init
+go mod tidy
+go get
+go fmt
+go install
+gradlew assemble debug
+gradlew assemble release
+gradlew build
+gradlew clean
+gradlew test
+gradlew install debug
+mvn clean install
+mvn package
+mvn test
+gem install
+bundle install
+bundle exec
+rake db migrate
+composer install
+composer require
+dotnet build
+dotnet run
+dotnet new
+# containers and services
+docker run
+docker run it
+docker build
+docker build t
+docker ps
+docker ps a
+docker images
+docker pull
+docker push
+docker stop
+docker start
+docker restart
+docker rm
+docker rmi
+docker exec it
+docker logs
+docker logs f
+docker compose up
+docker compose up d
+docker compose down
+docker compose build
+docker compose logs
+docker volume ls
+docker network ls
+docker system prune
+kubectl get pods
+kubectl get services
+kubectl get nodes
+kubectl describe pod
+kubectl logs
+kubectl apply f
+kubectl delete
+kubectl exec it
+kubectl config use context
+systemctl status
+systemctl start
+systemctl stop
+systemctl restart
+systemctl enable
+systemctl disable
+systemctl daemon reload
+systemctl list units
+journalctl u
+journalctl f
+service start
+service stop
+service restart
+service status
+crontab e
+crontab l
+# android
+adb devices
+adb shell
+adb install
+adb install r
+adb uninstall
+adb logcat
+adb push
+adb pull
+adb reboot
+adb reboot bootloader
+adb reboot recovery
+adb connect
+adb disconnect
+adb tcpip
+adb kill server
+adb start server
+adb forward
+adb pair
+fastboot devices
+fastboot flash
+fastboot reboot
+fastboot oem unlock
+fastboot flashing unlock
+am start
+am force stop
+pm list packages
+pm install
+pm uninstall
+pm clear
+dumpsys
+getprop
+setprop
+logcat
+# shell scripting
+bash zsh fish sh dash
+bin bash
+bin sh
+usr bin env
+shebang
+if then else elif fi
+for in do done
+while do done
+case esac
+function return
+local readonly declare
+set e
+set x
+trap exit
+exec
+eval
+test
+read p
+printf
+true false
+null
+dev null
+stdout stderr stdin
+bashrc zshrc profile
+home bin
+usr local bin
+etc hosts
+etc fstab
+var log
+sdcard download
+storage emulated
+data data
+data local tmp
+# programming words
+def class import from return lambda self init yield async await try except finally raise with assert pass break continue global nonlocal
+elif print len range enumerate isinstance dict list tuple set str int float bool none
+def main
+if name main
+import os
+import sys
+import json
+import re
+import time
+import requests
+from import
+const let var function undefined typeof instanceof console log
+console log
+console error
+module exports
+require
+export default
+export const
+import from
+async function
+await fetch
+promise resolve reject
+fun val var override class object interface data class sealed enum companion
+public private protected static final void abstract extends implements package
+public static void main
+system out println
+string args
+null pointer
+struct enum impl trait mut pub use mod crate fn match unwrap expect
+println
+printf
+sizeof malloc free include define ifdef endif ifndef typedef
+include stdio
+include stdlib
+include string
+int main
+return 0
+select from where insert into values update set delete create table drop alter join group by order by limit having distinct count
+select from
+insert into
+create table
+drop table
+alter table
+order by
+group by
+left join
+inner join
+# config and misc words
+localhost
+ssh key
+ssh config
+known hosts
+authorized keys
+id rsa
+id ed25519
+github
+gitlab
+codeberg
+stackoverflow
+readme
+license
+changelog
+makefile
+dockerfile
+gitignore
+package json
+requirements txt
+cargo toml
+build gradle
+settings gradle
+androidmanifest
+yaml yml json toml xml csv html css
+utf
+ascii
+regex
+sudoers
+daemon
+localhost
+repo
+repository
+branch
+commit
+merge conflict
+pull request
+issue
+fork
+upstream
+origin
+checkout
+stash
+rebase
+changelog
+debug
+release
+build
+deploy
+install
+uninstall
+config
+configure
+env
+verbose
+version
+help
