@@ -21,6 +21,7 @@ import helium314.keyboard.keyboard.KeyboardSwitcher;
 import helium314.keyboard.latin.common.ConstantsKt;
 import helium314.keyboard.latin.define.DebugFlags;
 import helium314.keyboard.latin.settings.Settings;
+import helium314.keyboard.latin.settings.SettingsValues;
 import helium314.keyboard.latin.utils.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
@@ -300,6 +301,20 @@ public final class RichInputConnection implements PrivateCommandPerformer {
         }
     }
 
+    private boolean isTerminalField() {
+        final SettingsValues values = Settings.getValues();
+        return values != null && values.mInputAttributes != null && values.mInputAttributes.mTerminalField;
+    }
+
+    /** Terminal apps don't show composing text, so we type the text right away and only send what changed. */
+    private void sendDirectly(final CharSequence oldText, final CharSequence newText) {
+        int common = 0;
+        final int max = Math.min(oldText.length(), newText.length());
+        while (common < max && oldText.charAt(common) == newText.charAt(common)) common++;
+        if (oldText.length() > common) mIC.deleteSurroundingText(oldText.length() - common, 0);
+        if (newText.length() > common) mIC.commitText(newText.subSequence(common, newText.length()), 1);
+    }
+
     public void finishComposingText() {
         if (DEBUG_BATCH_NESTING) checkBatchEdit();
         if (DEBUG_PREVIOUS_TEXT) checkConsistencyForDebug();
@@ -308,7 +323,7 @@ public final class RichInputConnection implements PrivateCommandPerformer {
         // it works, but it's wrong and should be fixed.
         mCommittedTextBeforeComposingText.append(mComposingText);
         mComposingText.setLength(0);
-        if (isConnected()) {
+        if (isConnected() && !isTerminalField()) {
             mIC.finishComposingText();
         }
     }
@@ -363,6 +378,7 @@ public final class RichInputConnection implements PrivateCommandPerformer {
      * @param newCursorPosition The new cursor position around the text.
      */
     public void commitText(final CharSequence text, final int newCursorPosition) {
+        final String oldComposing = mComposingText.toString();
         if (DEBUG_BATCH_NESTING) checkBatchEdit();
         if (DEBUG_PREVIOUS_TEXT) checkConsistencyForDebug();
         if (DebugFlags.DEBUG_ENABLED)
@@ -374,7 +390,9 @@ public final class RichInputConnection implements PrivateCommandPerformer {
         mExpectedSelStart += text.length() - mComposingText.length();
         mExpectedSelEnd = mExpectedSelStart;
         mComposingText.setLength(0);
-        if (isConnected()) {
+        if (isConnected() && isTerminalField()) {
+            sendDirectly(oldComposing, text);
+        } else if (isConnected()) {
             mTempObjectForCommitText.clear();
             mTempObjectForCommitText.append(text);
             final CharacterStyle[] spans = mTempObjectForCommitText.getSpans(
@@ -721,7 +739,7 @@ public final class RichInputConnection implements PrivateCommandPerformer {
             mCommittedTextBeforeComposingText.append(
                     textBeforeCursor.subSequence(0, indexOfStartOfComposingText));
         }
-        if (isConnected()) {
+        if (isConnected() && !isTerminalField()) {
             mIC.setComposingRegion(start, end);
         }
     }
@@ -731,6 +749,7 @@ public final class RichInputConnection implements PrivateCommandPerformer {
     public boolean setComposingText(final CharSequence text, final int newCursorPosition) {
         if (DEBUG_BATCH_NESTING) checkBatchEdit();
         if (DEBUG_PREVIOUS_TEXT) checkConsistencyForDebug();
+        final String oldComposing = mComposingText.toString();
         mExpectedSelStart += text.length() - mComposingText.length();
         mExpectedSelEnd = mExpectedSelStart;
         mComposingText.setLength(0);
@@ -740,6 +759,11 @@ public final class RichInputConnection implements PrivateCommandPerformer {
         if (isConnected()) {
             if (DebugFlags.DEBUG_ENABLED)
                 Log.d(TAG, "setting composing text of length "+text.length()); // don't log actual text
+            if (isTerminalField()) {
+                sendDirectly(oldComposing, text);
+                if (DEBUG_PREVIOUS_TEXT) checkConsistencyForDebug();
+                return true;
+            }
             mIC.setComposingText(text, newCursorPosition);
             if (!Settings.getValues().mInputAttributes.mShouldShowSuggestions && text.length() > 0) {
                 // We have a field that disables suggestions, but still committed text is set.
