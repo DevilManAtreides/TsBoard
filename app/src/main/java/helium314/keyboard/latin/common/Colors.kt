@@ -128,6 +128,7 @@ interface Colors {
         val corner = if (ownStyle) KeyFace.radiusPx(prefs, density)
             else (if (themeStyle == STYLE_MATERIAL) 5f else 10f) * density *
                 (if (color == FUNCTIONAL_KEY_BACKGROUND && themeStyle != STYLE_MATERIAL) 50f else 1f)
+        if (KeyFace.edge(prefs) == KeyFace.EDGE_NONE) return drawable
         if (KeyFace.edge(prefs) == KeyFace.EDGE_GLOW) {
             val size = prefs.getInt(Settings.PREF_KEY_GLOW_SIZE, Defaults.PREF_KEY_GLOW_SIZE) * density
             if (size <= 0f) return drawable

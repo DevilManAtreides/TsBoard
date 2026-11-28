@@ -49,10 +49,15 @@ object KeyFace {
 
     const val EDGE_OUTLINE = "outline"
     const val EDGE_GLOW = "glow"
+    const val EDGE_NONE = "none"
 
     @JvmStatic
     fun edge(prefs: SharedPreferences): String =
-        if (prefs.getString(Settings.PREF_KEY_EDGE, Defaults.PREF_KEY_EDGE) == EDGE_GLOW) EDGE_GLOW else EDGE_OUTLINE
+        when (prefs.getString(Settings.PREF_KEY_EDGE, Defaults.PREF_KEY_EDGE)) {
+            EDGE_GLOW -> EDGE_GLOW
+            EDGE_NONE -> EDGE_NONE
+            else -> EDGE_OUTLINE
+        }
 
     /** Corner radius of the keys in pixels if they use one of our own styles, otherwise 0. */
     @JvmStatic

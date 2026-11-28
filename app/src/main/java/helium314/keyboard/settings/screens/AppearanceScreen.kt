@@ -404,6 +404,7 @@ fun createAppearanceSettings(context: Context) = listOf(
         val items = listOf(
             ctx.getString(R.string.key_edge_outline) to KeyFace.EDGE_OUTLINE,
             ctx.getString(R.string.key_edge_glow) to KeyFace.EDGE_GLOW,
+            ctx.getString(R.string.key_edge_none) to KeyFace.EDGE_NONE,
         )
         ListPreference(setting, items, Defaults.PREF_KEY_EDGE, { ctx.prefs().edit { remove(Settings.PREF_KEY_EDGE) } }) {
             KeyboardSwitcher.getInstance().setThemeNeedsReload()

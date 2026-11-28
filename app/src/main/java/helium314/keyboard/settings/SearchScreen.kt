@@ -122,6 +122,7 @@ fun <T: Any?> SearchScreen(
     icon: @Composable (() -> Unit)? = null,
     menu: List<Pair<String, () -> Unit>>? = null,
     content: @Composable (ColumnScope.() -> Unit)? = null,
+    stickyContent: @Composable (() -> Unit)? = null, // stays above the list
 ) {
     // searchText and showSearch should have the same remember or rememberSaveable
     // saveable survives orientation changes and switching between screens, but shows the
@@ -192,6 +193,7 @@ fun <T: Any?> SearchScreen(
                     )
                 }
             }
+            stickyContent?.invoke()
             CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.bodyLarge) {
                 if (searchText.text.isBlank() && content != null) {
                     Column {

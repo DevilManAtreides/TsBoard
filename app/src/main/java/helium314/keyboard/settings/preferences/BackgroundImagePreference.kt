@@ -28,6 +28,7 @@ import helium314.keyboard.latin.utils.Log
 import helium314.keyboard.latin.utils.getActivity
 import helium314.keyboard.latin.utils.prefs
 import helium314.keyboard.settings.Setting
+import helium314.keyboard.settings.KeyboardPreviewRefresh
 import helium314.keyboard.settings.SettingsActivity
 import helium314.keyboard.settings.dialogs.ConfirmationDialog
 import helium314.keyboard.settings.dialogs.InfoDialog
@@ -57,6 +58,7 @@ fun BackgroundImagePref(setting: Setting, isLandscape: Boolean) {
         scope.launch(Dispatchers.IO) {
             if (!setBackgroundImage(ctx, uri, isNight, isLandscape))
                 showErrorDialog = true
+            else KeyboardPreviewRefresh.bump()
         }
     }
     val intent = IntentUtils.getResolvableTypeIntent(ctx, "image/*")
@@ -105,6 +107,7 @@ fun BackgroundImagePref(setting: Setting, isLandscape: Boolean) {
                 getFile().delete()
                 Settings.clearCachedBackgroundImages()
                 KeyboardSwitcher.getInstance().setThemeNeedsReload()
+                KeyboardPreviewRefresh.bump()
                 showSelectionDialog = false
             }
         )

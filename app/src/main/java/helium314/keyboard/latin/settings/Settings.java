@@ -550,6 +550,11 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
         return new File(DeviceProtectedUtils.getFilesDir(context), "custom_background_image" + (landscape ? "_landscape" : "") + (night ? "_night" : ""));
     }
 
+    /** whether the terminal and code words are on, which also allows suggestions in terminal apps */
+    public boolean isTerminalWordsEnabled() {
+        return mPrefs != null && mPrefs.getBoolean(PREF_TERMINAL_WORDS, Defaults.PREF_TERMINAL_WORDS);
+    }
+
     public static void clearCachedBackgroundImages() {
         Arrays.fill(sCachedBackgroundImages, null);
     }

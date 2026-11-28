@@ -56,6 +56,7 @@ import helium314.keyboard.latin.utils.getActivity
 import helium314.keyboard.latin.utils.prefs
 import helium314.keyboard.latin.utils.CloseIcon
 import helium314.keyboard.latin.utils.IntentUtils
+import helium314.keyboard.settings.KeyboardLivePreview
 import helium314.keyboard.settings.SearchScreen
 import helium314.keyboard.settings.SettingsActivity
 import helium314.keyboard.latin.utils.Theme
@@ -165,6 +166,7 @@ fun ColorsScreen(
             },
         ),
         onClickBack = onClickBack,
+        stickyContent = { KeyboardLivePreview() },
         filteredItems = { search ->
             val result = shownColors.filter { color ->
                 color.displayName.split(" ", "_").any { it.startsWith(search, true) }

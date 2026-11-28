@@ -44,6 +44,12 @@ import helium314.keyboard.latin.utils.SubtypeSettings
 import helium314.keyboard.latin.utils.getActivity
 import helium314.keyboard.latin.utils.prefs
 
+/** Changes that are not preferences (like the background image file) call [bump] to rebuild the preview. */
+object KeyboardPreviewRefresh {
+    var count by mutableStateOf(0)
+    fun bump() { count++ }
+}
+
 /**
  * Shows the keyboard the way it looks with the current settings and rebuilds it whenever a setting changes.
  * Keys can be tapped to try press animations and the key light. Nothing is typed.
@@ -53,6 +59,7 @@ fun KeyboardLivePreview() {
     val ctx = LocalContext.current
     val b = (ctx.getActivity() as? SettingsActivity)?.prefChanged?.collectAsState()
     val version = b?.value ?: 0
+    val refresh = KeyboardPreviewRefresh.count
     var visible by rememberSaveable { mutableStateOf(true) }
     Column(Modifier.fillMaxWidth()) {
         Row(
@@ -71,7 +78,7 @@ fun KeyboardLivePreview() {
             )
         }
         if (visible)
-            key(version) { // a new preview for every settings change
+            key(version, refresh) { // a new preview for every settings change
                 AndroidView(factory = { createPreview(it) }, modifier = Modifier.fillMaxWidth())
             }
     }
@@ -83,6 +90,8 @@ private fun createPreview(context: Context): View {
     val frame = FrameLayout(context)
     try {
         Settings.getInstance().loadSettings(context) // does nothing if the settings are already loaded
+        // read the settings again, colors and other changes might not be loaded yet
+        Settings.getValues().let { Settings.getInstance().loadSettings(context, it.mLocale, it.mInputAttributes) }
         val settingsValues = Settings.getValues()
         val themeContext = ContextThemeWrapper(context, KeyboardTheme.getKeyboardTheme(context).mStyleId)
         KeyboardLayoutSet.onKeyboardThemeChanged() // forget cached keyboards, they might not match the settings any more
