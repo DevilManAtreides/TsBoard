@@ -12,6 +12,7 @@ import android.view.inputmethod.EditorInfo;
 
 import helium314.keyboard.latin.common.StringUtilsKt;
 import helium314.keyboard.compat.AppWorkarounds;
+import helium314.keyboard.latin.settings.Settings;
 import helium314.keyboard.latin.utils.Log;
 import helium314.keyboard.latin.utils.InputTypeUtils;
 
