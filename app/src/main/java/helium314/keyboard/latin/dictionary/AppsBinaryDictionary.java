@@ -10,7 +10,6 @@ import com.android.inputmethod.latin.BinaryDictionary;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
@@ -23,7 +22,6 @@ import helium314.keyboard.latin.common.StringUtils;
 import helium314.keyboard.latin.utils.AppsUtils;
 import helium314.keyboard.latin.utils.Log;
 import helium314.keyboard.latin.utils.SpacedTokens;
-import helium314.keyboard.latin.utils.TerminalCompletions;
 
 // todo: actually we only need a single AppsBinaryDictionary, but currently
 //  have one for each language, and may even have multiple instances in multilingual typing
@@ -77,7 +75,6 @@ public class AppsBinaryDictionary extends ExpandableBinaryDictionary {
         }
         if (prefs.getBoolean(Settings.PREF_TERMINAL_WORDS, Defaults.PREF_TERMINAL_WORDS)) {
             loadTerminalWordsLocked();
-            loadImportedCompletionsLocked();
         }
     }
 
@@ -93,22 +90,6 @@ public class AppsBinaryDictionary extends ExpandableBinaryDictionary {
             }
         } catch (IOException e) {
             Log.e(TAG, "Could not read terminal words", e);
-        }
-    }
-
-    /** Loads the completions the user imported (made by the tsboard-sync script in Termux). */
-    private void loadImportedCompletionsLocked() {
-        try (InputStream in = TerminalCompletions.INSTANCE.open(mContext)) {
-            if (in == null) return;
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                line = line.trim();
-                if (line.isEmpty() || line.startsWith("#")) continue;
-                addNameLocked(line, FREQUENCY_FOR_TERMINAL, FREQUENCY_FOR_TERMINAL_BIGRAM);
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Could not read imported terminal completions", e);
         }
     }
 

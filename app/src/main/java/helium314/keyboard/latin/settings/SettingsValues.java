@@ -123,8 +123,6 @@ public class SettingsValues {
     public final boolean mAddToPersonalDictionary;
     public final boolean mUseContactsDictionary;
     public final boolean mUseAppsDictionary;
-    /** only the terminal and code words are suggested (in terminal apps) */
-    public final boolean mTerminalCodeOnly;
     public final boolean mCustomNavBarColor;
     public final boolean mBlackNavBar;
     public final float mKeyboardHeightScale;
@@ -314,8 +312,6 @@ public class SettingsValues {
         mAddToPersonalDictionary = prefs.getBoolean(Settings.PREF_ADD_TO_PERSONAL_DICTIONARY, Defaults.PREF_ADD_TO_PERSONAL_DICTIONARY);
         mUseContactsDictionary = SettingsValues.readUseContactsEnabled(prefs, context);
         // the apps dictionary also holds the terminal and code words
-        mTerminalCodeOnly = mInputAttributes.mTerminalField
-                && prefs.getBoolean(Settings.PREF_TERMINAL_ONLY, Defaults.PREF_TERMINAL_ONLY);
         mUseAppsDictionary = prefs.getBoolean(Settings.PREF_USE_APPS, Defaults.PREF_USE_APPS)
                 || prefs.getBoolean(Settings.PREF_TERMINAL_WORDS, Defaults.PREF_TERMINAL_WORDS);
         mCustomNavBarColor = prefs.getBoolean(Settings.PREF_NAVBAR_COLOR, Defaults.PREF_NAVBAR_COLOR);

@@ -170,9 +170,6 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
     public static final String PREF_USE_CONTACTS = "use_contacts";
     public static final String PREF_USE_APPS = "use_apps";
     public static final String PREF_TERMINAL_WORDS = "terminal_words";
-    public static final String PREF_TERMINAL_ONLY = "terminal_code_only";
-    public static final String PREF_TERMINAL_IMPORT_URI = "terminal_import_uri";
-    public static final String PREF_TERMINAL_IMPORT_MODIFIED = "terminal_import_modified";
     public static final String PREFS_LONG_PRESS_SYMBOLS_FOR_NUMPAD = "long_press_symbols_for_numpad";
 
     public static final String PREF_ONE_HANDED_MODE_PREFIX = "one_handed_mode_enabled";
