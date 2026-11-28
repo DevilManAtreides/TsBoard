@@ -754,6 +754,8 @@ New dictionary:
     <string name="key_glow_size">Glow size</string>
     <string name="key_glow_color">Glow color</string>
     <string name="key_glow_color_summary">The opacity bar sets how bright the glow is</string>
+    <string name="coding_mode">Coding mode (command suggestions)</string>
+    <string name="coding_mode_summary">For terminal apps like Termux. The keyboard follows the command line you type and suggests commands, subcommands and flags. Replaces the normal word suggestions while it is on, so turn it on only for terminal apps with App profiles. After using the arrow keys, Tab or the up arrow it waits for the next Enter before suggesting again.</string>
     <string name="terminal_words_dict">Terminal and code words</string>
     <string name="terminal_words_dict_summary">Suggests shell commands, tools and programming words, predicts the next word after commands like git or pkg, and stops autocorrect from changing them. Use it with App profiles to turn it on only in terminal apps. Termux needs enforce-char-based-input = true in its termux.properties file for suggestions to show.</string>
     <string name="live_preview">Live preview (tap the keys to try animations)</string>

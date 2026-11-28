@@ -155,6 +155,8 @@ public class SettingsValues {
     public final boolean mBackspaceRevertsAutocorrect;
     public final boolean mAutoCorrectShortcuts;
     public final boolean mSuggestionsEnabled;
+    /** coding mode: the command line engine makes the suggestions instead of the dictionaries */
+    public final boolean mCodingMode;
     private final boolean mOverrideShowingSuggestions;
     public final boolean mSuggestClipboardContent;
     public final boolean mIncognitoModeEnabled;
@@ -269,6 +271,7 @@ public class SettingsValues {
                 && prefs.getBoolean(Settings.PREF_ALWAYS_SHOW_SUGGESTIONS, Defaults.PREF_ALWAYS_SHOW_SUGGESTIONS)
                 && ((inputAttributes.mInputType & InputType.TYPE_MASK_VARIATION) != InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
                   || !prefs.getBoolean(Settings.PREF_ALWAYS_SHOW_SUGGESTIONS_EXCEPT_WEB_TEXT, Defaults.PREF_ALWAYS_SHOW_SUGGESTIONS_EXCEPT_WEB_TEXT));
+        mCodingMode = prefs.getBoolean(Settings.PREF_CODING_MODE, Defaults.PREF_CODING_MODE);
         mSuggestionsEnabled = prefs.getBoolean(Settings.PREF_SHOW_SUGGESTIONS, Defaults.PREF_SHOW_SUGGESTIONS)
             && (mInputAttributes.mShouldShowSuggestions || mOverrideShowingSuggestions) && !mSuggestionStripHiddenPerUserSettings;
         mIncognitoModeEnabled = prefs.getBoolean(Settings.PREF_ALWAYS_INCOGNITO_MODE, Defaults.PREF_ALWAYS_INCOGNITO_MODE) || mInputAttributes.mNoLearning
@@ -346,6 +349,7 @@ public class SettingsValues {
     }
 
     public boolean needsToLookupSuggestions() {
+        if (mCodingMode) return false; // text is typed directly, the coding engine makes the suggestions
         return (mInputAttributes.mShouldShowSuggestions || mOverrideShowingSuggestions)
                 && (mAutoCorrectEnabled || mSuggestionsEnabled);
     }

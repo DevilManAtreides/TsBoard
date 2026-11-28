@@ -1,0 +1,384 @@
+# command: what usually follows (subcommands first, then flags). A key with two words is a subcommand.
+git: init clone add commit push pull fetch merge rebase checkout switch branch status log diff stash reset restore remote tag show config clean cherry-pick revert bisect blame submodule worktree reflog grep mv rm describe shortlog archive gc fsck apply am format-patch bundle
+ls: -l -a -la -lh -lah -R -t -S -1 -d -F -r --color --help
+cd: .. - ~ /
+cat: -n -A -s --help
+cp: -r -a -v -i -u -p -f --help
+mv: -v -i -f -n -u --help
+rm: -r -f -rf -v -i -d --help
+mkdir: -p -v -m --help
+pkg: install update upgrade search remove uninstall list-installed list-all show files reinstall autoclean clean edit-sources
+apt: install update upgrade search remove purge list show autoremove full-upgrade edit-sources
+pip: install uninstall list freeze show search download check
+pip3: install uninstall list freeze show search download check
+python: -m -c -V -u -i -O -B -W -q --version --help
+python3: -m -c -V -u -i -O -B -W -q --version --help
+npm: install uninstall update init run start test build publish ci link ls outdated audit cache config login version pack exec
+node: -e -p -v -r -i --version --inspect --check --watch
+curl: -L -s -S -o -O -X -H -d -F -I -i -v -k -u -A -e -b -c -f -fsSL -sL --data --header --output --silent --insecure --compressed --retry --connect-timeout --max-time --location --request --user-agent --cookie --head --include --fail --progress-bar -T --upload-file
+wget: -O -c -q -P -r -np -nc -b -i -U --no-check-certificate --header --mirror --tries --timeout --spider -nv
+ssh: -p -i -L -R -D -N -f -v -X -A -o -J -T -t -q -C -l
+grep: -r -i -n -v -E -w -l -c -o -A -B -C -R -F -H -q --color --include --exclude -rn -rni -ri
+find: -name -iname -type -mtime -size -exec -delete -maxdepth -mindepth -print -path -user -perm
+tar: -xzf -czf -xvf -cvf -xf -cf -tf -tzf -xJf -cJf -xjf -cjf -C -v -z -x -c -f --exclude --strip-components
+chmod: -R +x -x 755 644 600 777 u+x a+x +r -v
+docker: run ps images build pull push exec logs stop start rm rmi compose network volume system inspect cp tag login
+nano: -l -w -B -c
+vim: -O -o -p -R -d +
+echo: -n -e
+clear: 
+exit: 
+pwd: 
+sudo: -i -u -s -E -k
+cargo: new init build run test check clean update add remove install uninstall search publish doc fmt clippy bench tree
+go: run build test mod get install fmt vet clean version env generate -v -o -race -ldflags -tags
+make: -j -C -f -n -B -k -s clean install all test
+tmux: new -s attach -t ls kill-session -a -d split-window source-file send-keys
+kill: -9 -15 -l -s
+ps: -ef -aux -e -f -u -p
+top: -d -n -p -u
+df: -h -T -a -i
+du: -h -s -sh -a -d -c --max-depth
+ping: -c -i -W -s -4 -6 -q
+ln: -s -sf -f -v
+touch: -a -m -c -t
+sed: -i -e -n -E -r -f -s
+awk: -F -f -v
+sort: -n -r -u -k -t -h
+head: -n -c
+tail: -n -f -F -c
+less: -N -S -R -F
+man: -k -f
+which: -a
+export: PATH= HOME= LANG=
+source: ~/.bashrc ~/.zshrc
+history: -c -w
+adb: devices shell install uninstall push pull logcat connect disconnect pair reboot tcpip forward reverse -s -d -e kill-server start-server
+ffmpeg: -i -c:v -c:a -vf -af -ss -t -to -r -b:v -b:a -y -an -vn -map -f -crf -preset libx264 libx265 aac copy
+yt-dlp: -f -x -o -F -P --audio-format --embed-thumbnail --embed-metadata --write-subs --list-formats -S --cookies --playlist-items --merge-output-format --no-playlist
+gh: repo pr issue auth gist release workflow run api browse clone create view list checkout merge
+unzip: -l -d -o -q -p
+zip: -r -q -e -9 -x
+rsync: -avz -av -a -v -z -r -P -n -u --progress --delete --exclude --include -e --dry-run --partial --stats -h
+scp: -r -P -i -C -p -q -v
+rmdir: -p -v --help
+chown: -R -v --help
+egrep: -i -n -v -r
+cut: -d -f -c
+uniq: -c -d -u -i
+wc: -l -w -c -m
+tr: -d -s -c
+tee: -a
+xargs: -n -I -P -0 -r
+diff: -u -r -q -y -w -i --color
+free: -h -m -g
+killall: -9 -s -q
+pkill: -9 -f -u
+pgrep: -l -f -a
+nohup: 
+sleep: 1 5 10 60
+date: +%Y-%m-%d +%s -u -d
+alias: -p
+whoami: 
+uname: -a -r -m -n
+uptime: -p
+gzip: -d -k -9 -c -r -v
+gunzip: -k -c
+7z: x a l -o -p
+xz: -d -k -9 -T
+bzip2: -d -k -9
+sftp: -P -i -o
+ssh-keygen: -t -b -C -f -N -p -l -R -y ed25519 rsa
+ssh-copy-id: -i -p
+nc: -l -v -z -w -p -u -k -n
+nmap: -sV -sS -sn -p -p- -A -O -T4 -Pn -v -oN -oX --script
+ip: a addr link route neigh -4 -6 -s -c
+ifconfig: -a
+netstat: -tulpn -an -r -l -p -t -u
+ss: -tulpn -l -t -u -n -p
+dig: +short -x @ +trace ANY MX TXT NS
+nslookup: -type=
+traceroute: -n -m -w
+host: -t -a
+whois: 
+openssl: -in -out -days -newkey -keyout -x509 -nodes -text -noout -subj
+base64: -d -w
+md5sum: -c
+sha256sum: -c
+sha1sum: -c
+xxd: -r -p -l
+hexdump: -C -n
+strings: -n
+file: -b -i
+stat: -c
+basename: -s
+dirname: 
+realpath: -s
+readlink: -f
+env: -i -u
+printenv: 
+screen: -S -r -ls -d -dmS -X
+more: -d
+watch: -n -d -t
+time: -p
+timeout: -s -k
+yes: 
+seq: -s -w
+shuf: -n -e
+bc: -l
+jq: . -r -c -e -s -n -S --arg --argjson -M .[] .[0] keys length
+yq: -r -i -P
+tree: -L -a -d -h -I -C -f --du
+lsof: -i -p -u -t -n -P
+strace: -f -p -o -e -c
+nproc: --all
+htop: -u -p
+btop: 
+neofetch: 
+fastfetch: 
+ncdu: -x
+fd: -e -t -H -I -x -d --hidden --no-ignore --extension --type
+rg: -i -n -l -w -F -t -g -A -B -C --hidden --no-ignore --files --type-list -S -uu --glob --stats -c
+bat: -n -p -l -A --style --theme --paging -r
+fzf: -m -e -i --preview --height --reverse --multi --ansi
+eza: -l -a -la -T -R --tree --icons --git --color
+exa: -l -a -la -T --icons --git
+cmake: -S -B -D -G --build --install -DCMAKE_BUILD_TYPE=Release -DCMAKE_BUILD_TYPE=Debug ..
+ninja: -C -j -v -t
+gcc: -o -c -O2 -O3 -Wall -Wextra -g -std=c11 -std=c99 -I -L -l -lm -lpthread -shared -fPIC -D -E -S -pthread
+g++: -o -c -O2 -O3 -Wall -Wextra -g -std=c++17 -std=c++20 -I -L -l -shared -fPIC -D -pthread
+clang: -o -c -O2 -Wall -g -std=c11 -I -L -l
+clang++: -o -c -O2 -Wall -g -std=c++17 -I -L -l
+gdb: -q -ex -x --args -p
+valgrind: --leak-check=full --show-leak-kinds=all --track-origins=yes -v
+deno: run test fmt lint check install --allow-all -A --allow-net --allow-read --allow-write --watch
+bun: run install add remove x dev build test init create --watch
+ruby: -e -v
+perl: -e -n -p -i -l -a -w -v -M
+php: -r -S -v -m -i -l -a
+lua: -e -v -i
+java: -jar -cp -version -Xmx -Xms -D
+javac: -d -cp -version -source -target
+kotlinc: -d -cp -include-runtime
+rustc: -O -o --edition --crate-type --emit -C -L -g
+rustup: update default toolchain component target show install self
+gem: install uninstall update list search build push
+bundle: install update exec init add
+pipx: install uninstall list run upgrade ensurepath
+npx: -y --yes -p create-react-app create-next-app vite
+yarn: add remove install init run build start test upgrade global dlx
+pnpm: add remove install init run build start test update dlx exec
+tsc: --init --watch -p --noEmit --outDir --target --strict
+eslint: --fix .
+prettier: --write --check .
+vite: build dev preview --host --port
+uv: pip run init add remove sync venv lock tool python
+poetry: new init install add remove update run shell build publish lock
+pytest: -v -vv -x -s -k -q --tb=short --lf --ff -n --cov --maxfail
+black: --check --diff -l
+ruff: check format --fix --watch
+flake8: --max-line-length --ignore
+mypy: --strict --ignore-missing-imports
+sqlite3: -header -column -csv -json -cmd -init
+psql: -h -p -U -d -c -f -l
+mysql: -u -p -h -P -e -D
+redis-cli: -h -p -a --scan PING keys get set
+mongosh: --host --port
+podman: run ps images build pull push exec logs stop start rm rmi
+kubectl: get apply delete describe logs exec port-forward config rollout scale create edit -n -f -o
+helm: install upgrade uninstall list repo search template
+terraform: init plan apply destroy validate fmt output state
+ansible: -i -m -a -b -K
+systemctl: start stop restart status enable disable reload daemon-reload list-units --user
+journalctl: -u -f -n -b -e -x -p --since --until --no-pager
+crontab: -e -l -r
+service: start stop restart status
+su: -
+termux-setup-storage: 
+termux-reload-settings: 
+termux-info: 
+termux-change-repo: 
+termux-open: --send --view
+termux-open-url: 
+termux-clipboard-get: 
+termux-clipboard-set: 
+termux-notification: -t -c --id --title --content --action --button1
+termux-toast: -b -c -g -s
+termux-vibrate: -d -f
+termux-battery-status: 
+termux-wifi-connectioninfo: 
+termux-wifi-scaninfo: 
+termux-location: -p -r
+termux-camera-photo: -c
+termux-tts-speak: -l -r -p
+termux-share: -a -c -d
+termux-wake-lock: 
+termux-wake-unlock: 
+termux-fix-shebang: 
+termux-backup: 
+termux-restore: 
+dpkg: -i -l -L -S -r -P -s --configure
+proot: -0 -b -r -w -S
+proot-distro: install login list remove reset backup restore rename --shared-tmp --user
+fastboot: devices flash reboot oem unlock getvar
+ffprobe: -v -show_format -show_streams -print_format
+convert: -resize -quality -rotate -crop -colorspace
+magick: -resize -quality -rotate -crop
+pandoc: -o -f -t -s --toc --pdf-engine
+imagemagick: 
+brew: install update upgrade search list
+zsh: -c -i -l
+bash: -c -i -l -x -n --norc
+sh: -c -x -e
+chsh: -s
+passwd: 
+useradd: -m -s -G
+groups: 
+id: -u -g -n
+mount: -t -o -a
+umount: -l -f
+dd: if= of= bs= count= status=progress conv=
+mkfs: -t
+lsblk: -f -a
+fdisk: -l
+rename: -n -v
+split: -b -l -d
+column: -t -s
+paste: -d -s
+comm: -12 -13 -23
+join: -t -1 -2
+nl: -ba
+rev: 
+fold: -w -s
+expand: -t
+iconv: -f -t -c
+dos2unix: -n
+unix2dos: 
+od: -A -t -c
+cmp: -l -s
+patch: -p1 -R -i --dry-run
+envsubst: 
+getopts: 
+trap: EXIT INT TERM ERR
+read: -r -p -s -a -t
+printf: 
+test: -f -d -e -r -w -x -z -n
+type: -a -t
+ulimit: -a -n -s
+set: -e -u -x -o pipefail
+unset: -v -f
+wait: -n
+disown: -h -a
+jobs: -l
+fg: %1
+bg: %1
+git init: -b --bare
+git clone: --depth --recursive -b --single-branch --branch --shallow-submodules --filter=blob:none --bare --mirror
+git add: . -A -p -u -f -n -N --all --patch --intent-to-add
+git commit: -m -a -am -v --amend --no-edit --allow-empty -S --no-verify --fixup --squash -F --author --date
+git push: -u origin main master --force --force-with-lease --tags --delete -f --all --set-upstream --dry-run --no-verify
+git pull: --rebase --ff-only --no-rebase origin main master --autostash -p
+git fetch: --all --prune --tags origin upstream -p --depth --unshallow
+git merge: --no-ff --squash --abort --continue --ff-only -m --no-commit
+git rebase: -i --abort --continue --skip --onto --autosquash --root --interactive main master
+git checkout: -b -B . -f --orphan --track -t main master
+git switch: -c -C - --detach main master
+git branch: -a -d -D -m -M -r -v -vv --list --merged --no-merged --show-current --set-upstream-to --unset-upstream
+git status: -s -sb -b --short --branch --porcelain --ignored -uno
+git log: --oneline --graph --all --decorate -p -n --stat --since --until --author --grep --pretty=format --follow --name-only --name-status --abbrev-commit -S --merges --no-merges --first-parent
+git diff: --staged --cached --stat --name-only --name-status HEAD HEAD~1 -w --color-words --check --shortstat main origin/main
+git stash: push pop apply list drop clear show -u -m branch --keep-index --include-untracked
+git reset: --hard --soft --mixed HEAD HEAD~1 HEAD~2 --keep
+git restore: --staged --source -p --worktree .
+git remote: add remove rename show -v set-url get-url prune update origin upstream
+git tag: -a -d -l -m -f -s -n -v --list --delete --sort
+git show: --stat --name-only -s --pretty=fuller HEAD
+git config: --global --local --system --list -l --unset --get -e user.name user.email core.editor pull.rebase init.defaultBranch alias. credential.helper --add
+git clean: -f -fd -fdx -n -d -x -i
+git cherry-pick: -x -n --continue --abort --skip -e --no-commit
+git revert: --no-edit -n --abort --continue -m
+git bisect: start bad good reset run skip log visualize
+git blame: -L -w -C -e --since
+git submodule: add update init status sync foreach deinit --init --recursive --remote
+git worktree: add list remove prune move lock unlock
+git reflog: show expire delete --all
+git grep: -n -i -w -c -l -e --untracked -p -E -F
+pkg install: -y
+pkg upgrade: -y
+pkg update: 
+pkg search: 
+pkg remove: -y
+pkg list-installed: 
+docker run: -it -d --rm -p -v -e --name --network -w --restart --privileged -u --entrypoint -i -t --env-file --platform
+docker ps: -a -q -l --format
+docker images: -a -q --format
+docker build: -t -f --no-cache --build-arg --target --platform .
+docker exec: -it -u -w -e
+docker logs: -f --tail --since -t
+docker compose: up down build ps logs restart stop start pull exec run config -d -f --build --force-recreate -v --remove-orphans
+docker system: prune df info -a -f
+docker network: ls create rm inspect connect
+docker volume: ls create rm inspect prune
+docker rm: -f -v
+docker rmi: -f
+docker stop: 
+docker pull: --platform -a
+docker push: 
+docker cp: -a
+docker inspect: --format
+docker tag: 
+docker login: -u -p
+npm install: -g -D --save-dev --save --save-exact --legacy-peer-deps --no-save --force --production --ignore-scripts
+npm run: build dev start test lint watch serve --silent
+npm init: -y
+npm update: -g
+npm uninstall: -g
+npm ls: -g --depth=0
+npm audit: fix --force
+npm publish: --access --tag --dry-run
+npm cache: clean --force verify
+npm config: set get list delete
+cargo build: --release -p --all-targets --target --features --all-features -v
+cargo run: --release -p --bin --example
+cargo test: --release -p --lib --doc --nocapture --test-threads=1
+cargo new: --bin --lib --vcs
+cargo add: --features --dev --build --optional
+cargo install: --path --force --locked --git --version
+cargo clippy: --all-targets -D warnings --fix
+cargo fmt: --check --all
+cargo doc: --open --no-deps
+pip install: -r -U --upgrade -e --user --no-cache-dir --break-system-packages --force-reinstall --pre -q --no-deps -i --index-url --target
+pip uninstall: -y -r
+pip list: --outdated -o --format=freeze
+pip freeze: requirements.txt
+pip show: -f
+apt install: -y --no-install-recommends --reinstall
+apt update: 
+apt upgrade: -y
+apt remove: -y --purge
+apt search: 
+systemctl status: --no-pager -l
+systemctl enable: --now
+systemctl disable: --now
+systemctl start: 
+systemctl stop: 
+systemctl restart: 
+kubectl get: pods svc deployments nodes ns all ingress configmap secret -o wide -n -A --all-namespaces -w yaml json name
+kubectl apply: -f -k --dry-run=client
+kubectl delete: -f pod svc deployment -n --all --force
+kubectl describe: pod svc node deployment -n
+kubectl logs: -f --tail -c -n --previous
+kubectl exec: -it -n -c
+kubectl config: get-contexts use-context current-context view set-context
+kubectl rollout: status restart undo history
+tmux new: -s -d -A -n
+tmux attach: -t -d
+tmux kill-session: -t -a
+tmux ls: 
+tmux split-window: -h -v -c
+gh pr: create list view checkout merge close status diff review
+gh repo: create clone view fork list delete
+gh issue: create list view close
+gh auth: login logout status refresh
+gh release: create list view download
+gh run: list view watch

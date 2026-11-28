@@ -94,6 +94,7 @@ fun TextCorrectionScreen(
         Settings.PREF_SUGGEST_CLIPBOARD_CONTENT,
         Settings.PREF_USE_CONTACTS,
         Settings.PREF_USE_APPS,
+        Settings.PREF_CODING_MODE,
         Settings.PREF_TERMINAL_WORDS,
         if (prefs.getBoolean(Settings.PREF_KEY_USE_PERSONALIZED_DICTS, Defaults.PREF_KEY_USE_PERSONALIZED_DICTS))
             Settings.PREF_ADD_TO_PERSONAL_DICTIONARY else null,
@@ -269,6 +270,11 @@ fun createCorrectionSettings(context: Context) = listOf(
         R.string.use_apps_dict, R.string.use_apps_dict_summary
     ) { setting ->
         SwitchPreference(setting, Defaults.PREF_USE_APPS) { ExpandableDictionaryUtils.setNeedsUpdate(Dictionary.TYPE_APPS) }
+    },
+    Setting(context, Settings.PREF_CODING_MODE,
+        R.string.coding_mode, R.string.coding_mode_summary
+    ) { setting ->
+        SwitchPreference(setting, Defaults.PREF_CODING_MODE)
     },
     Setting(context, Settings.PREF_TERMINAL_WORDS,
         R.string.terminal_words_dict, R.string.terminal_words_dict_summary

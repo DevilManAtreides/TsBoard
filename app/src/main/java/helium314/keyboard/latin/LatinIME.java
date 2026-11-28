@@ -61,6 +61,7 @@ import helium314.keyboard.latin.suggestions.SuggestionStripView;
 import helium314.keyboard.latin.suggestions.SuggestionStripViewAccessor;
 import helium314.keyboard.latin.touchinputconsumer.GestureConsumer;
 import helium314.keyboard.latin.utils.AppProfiles;
+import helium314.keyboard.latin.utils.CodeEngine;
 import helium314.keyboard.latin.utils.ColorUtilKt;
 import helium314.keyboard.latin.utils.GestureDataGatheringKt;
 import helium314.keyboard.latin.utils.GestureDataGatheringSettings;
@@ -773,6 +774,8 @@ public class LatinIME extends InputMethodService implements
     }
 
     void onStartInputViewInternal(EditorInfo editorInfo, boolean restarting) {
+        CodeEngine.INSTANCE.init(this);
+        if (!restarting) CodeEngine.INSTANCE.reset();
         super.onStartInputView(editorInfo, restarting);
 
         setGestureDataGatheringMode(editorInfo, restarting);
@@ -1248,14 +1251,18 @@ public class LatinIME extends InputMethodService implements
         if (KeyCode.VOICE_INPUT == event.getKeyCode()) {
             mRichImm.switchToShortcutIme(this);
         }
+        final boolean codingMode = mSettings.getCurrent().mCodingMode;
+        if (codingMode) CodeEngine.INSTANCE.onEvent(event);
         InputTransaction completeInputTransaction =
                 mInputLogic.onCodeInput(mSettings.getCurrent(), event, mKeyboardSwitcher.getKeyboardCapsMode(), mHandler);
         updateStateAfterInputTransaction(completeInputTransaction);
         mKeyboardSwitcher.onEvent(event, getCurrentAutoCapsState(), getCurrentRecapitalizeState());
+        if (codingMode) setSuggestions(CodeEngine.INSTANCE.suggestions());
     }
 
     public void onTextInput(@Nullable String rawText) {
         if (rawText == null) return;
+        if (mSettings.getCurrent().mCodingMode) CodeEngine.INSTANCE.onText(rawText);
         // TODO: have the keyboard pass the correct key code when we need it.
         Event event = Event.createSoftwareTextEvent(rawText, KeyCode.MULTIPLE_CODE_POINTS, null);
         InputTransaction completeInputTransaction = mInputLogic.onTextInput(mSettings.getCurrent(),
@@ -1324,7 +1331,7 @@ public class LatinIME extends InputMethodService implements
                 || suggestedWords instanceof PunctuationSuggestions
                 || suggestedWords.getInputStyle() == InputStyle.APPLICATION_SPECIFIED;
 
-        if (currentSettingsValues.mSuggestionsEnabled
+        if (currentSettingsValues.mSuggestionsEnabled || currentSettingsValues.mCodingMode
                 || currentSettingsValues.mInputAttributes.mApplicationSpecifiedCompletionOn
                 // We should clear the contextual strip if there is no suggestion from dictionaries.
                 || noSuggestionsFromDictionaries) {
@@ -1364,6 +1371,12 @@ public class LatinIME extends InputMethodService implements
     // interface
     @Override
     public void pickSuggestionManually(SuggestedWordInfo suggestionInfo) {
+        if (mSettings.getCurrent().mCodingMode && CodeEngine.INSTANCE.owns(suggestionInfo)) {
+            // type the suggestion like the user would, so the engine keeps following the line
+            for (final int code : CodeEngine.INSTANCE.keysFor(suggestionInfo))
+                onCodeInput(code, Constants.NOT_A_COORDINATE, Constants.NOT_A_COORDINATE, false);
+            return;
+        }
         InputTransaction completeInputTransaction = mInputLogic.onPickSuggestionManually(
                 mSettings.getCurrent(), suggestionInfo, mKeyboardSwitcher.getKeyboardCapsMode(), mHandler);
         updateStateAfterInputTransaction(completeInputTransaction);
@@ -1391,6 +1404,13 @@ public class LatinIME extends InputMethodService implements
     @Override
     public void setNeutralSuggestionStrip() {
         final SettingsValues currentSettings = mSettings.getCurrent();
+        if (currentSettings.mCodingMode) {
+            final SuggestedWords codeSuggestions = CodeEngine.INSTANCE.suggestions();
+            if (!codeSuggestions.isEmpty()) {
+                setSuggestedWords(codeSuggestions);
+                return;
+            }
+        }
         if (tryShowClipboardSuggestion()) {
             // clipboard suggestion has been set
             if (hasSuggestionStripView() && currentSettings.mAutoHideToolbar)
