@@ -47,8 +47,6 @@ public final class InputAttributes {
     final public boolean mDisableGestureFloatingPreviewText;
     final public boolean mIsGeneralTextInput;
     final public int mInputType;
-    /** terminal apps (Termux): text is sent right away, because they don't show composing text */
-    final public boolean mTerminalField;
     final private EditorInfo mEditorInfo;
     final private String mPackageNameForPrivateImeOptions;
 
@@ -66,8 +64,6 @@ public final class InputAttributes {
             inputType |= InputType.TYPE_CLASS_TEXT;
         mInputType = inputType;
         final int inputClass = mInputType & InputType.TYPE_MASK_CLASS;
-        mTerminalField = Settings.getInstance().isTerminalWordsEnabled()
-                && InputTypeUtils.isVisiblePasswordInputType(mInputType);
         mIsPasswordField = InputTypeUtils.isPasswordInputType(mInputType)
                 || InputTypeUtils.isVisiblePasswordInputType(mInputType);
         if (inputClass != InputType.TYPE_CLASS_TEXT) {
