@@ -23,8 +23,7 @@ object ExpandableDictionaryUtils {
             files.forEach { if (it.name.startsWith(ContactsBinaryDictionary.NAME)) it.deleteRecursively() }
         if (!prefs.getBoolean(Settings.PREF_KEY_USE_PERSONALIZED_DICTS, Defaults.PREF_KEY_USE_PERSONALIZED_DICTS))
             files.forEach { if (it.name.startsWith(UserBinaryDictionary.NAME)) it.deleteRecursively() }
-        if (!prefs.getBoolean(Settings.PREF_USE_APPS, Defaults.PREF_USE_APPS)
-            && !prefs.getBoolean(Settings.PREF_TERMINAL_WORDS, Defaults.PREF_TERMINAL_WORDS))
+        if (!prefs.getBoolean(Settings.PREF_USE_APPS, Defaults.PREF_USE_APPS))
             files.forEach { if (it.name.startsWith(AppsBinaryDictionary.NAME)) it.deleteRecursively() }
         upToDateDicts.addAll(files.map { it.nameWithoutExtension })
     }

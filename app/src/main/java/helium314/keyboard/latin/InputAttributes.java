@@ -94,12 +94,8 @@ public final class InputAttributes {
 
         // TODO: Have a helper method in InputTypeUtils
         // Make sure that passwords are not displayed in {@link SuggestionStripView}.
-        // terminal apps like Termux report their input as a visible password without suggestions,
-        // with the terminal words turned on (maybe by an app profile) suggestions are wanted there
-        final boolean terminalWords = Settings.getInstance().isTerminalWordsEnabled();
-        final boolean terminalField = terminalWords && InputTypeUtils.isVisiblePasswordInputType(mInputType);
-        mShouldShowSuggestions = (!mIsPasswordField || terminalField) && (!flagNoSuggestions || terminalWords);
-        mMayOverrideShowingSuggestions = !mIsPasswordField || terminalField;
+        mShouldShowSuggestions = !mIsPasswordField && !flagNoSuggestions;
+        mMayOverrideShowingSuggestions = !mIsPasswordField;
 
         mShouldInsertSpacesAutomatically = InputTypeUtils.isAutoSpaceFriendlyType(mInputType);
 

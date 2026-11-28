@@ -140,13 +140,11 @@ object AppProfiles {
         val savedText = prefs.getString(KEY_SAVED, null)
         if (activeId == null && savedText == null) return false
         val saved = parse(savedText)
-        val words = terminalWords(prefs)
         prefs.edit {
             for (key in saved.keys()) write(this, key, saved.getJSONObject(key))
             remove(KEY_SAVED)
             remove(KEY_ACTIVE)
         }
-        reloadWordsIfChanged(prefs, words)
         reload()
         return true
     }
@@ -154,7 +152,6 @@ object AppProfiles {
     private fun apply(prefs: SharedPreferences, profile: Profile) {
         val current = prefs.all
         val saved = JSONObject()
-        val words = terminalWords(prefs)
         prefs.edit {
             for (key in profile.overrides.keys()) {
                 if (excluded(key)) continue
@@ -164,7 +161,6 @@ object AppProfiles {
             putString(KEY_SAVED, saved.toString())
             putString(KEY_ACTIVE, profile.id)
         }
-        reloadWordsIfChanged(prefs, words)
     }
 
     // ---- editing ----
@@ -183,13 +179,11 @@ object AppProfiles {
         revertActive(context)
         val base = JSONObject()
         for ((key, value) in prefs.all) if (!excluded(key)) base.put(key, encode(value))
-        val words = terminalWords(prefs)
         prefs.edit {
             putString(KEY_EDIT_BASE, base.toString())
             putString(KEY_EDIT, id)
             for (key in profile.overrides.keys()) if (!excluded(key)) write(this, key, profile.overrides.getJSONObject(key))
         }
-        reloadWordsIfChanged(prefs, words)
         reload()
         return true
     }
@@ -201,7 +195,6 @@ object AppProfiles {
         val base = parse(prefs.getString(KEY_EDIT_BASE, null))
         val current = prefs.all
         val diff = JSONObject()
-        val words = terminalWords(prefs)
         if (saveChanges) {
             for ((key, value) in current) {
                 if (excluded(key)) continue
@@ -217,7 +210,6 @@ object AppProfiles {
             remove(KEY_EDIT)
             remove(KEY_EDIT_BASE)
         }
-        reloadWordsIfChanged(prefs, words)
         if (saveChanges) update(prefs, id) { it.overrides = diff }
         reload()
     }
@@ -270,13 +262,6 @@ object AppProfiles {
             }
             else -> editor.remove(key)
         }
-    }
-
-    private fun terminalWords(prefs: SharedPreferences) = prefs.getBoolean(Settings.PREF_TERMINAL_WORDS, false)
-
-    /** The terminal words live in the apps dictionary, which needs a reload if the setting was changed. */
-    private fun reloadWordsIfChanged(prefs: SharedPreferences, before: Boolean) {
-        if (terminalWords(prefs) != before) ExpandableDictionaryUtils.setNeedsUpdate(Dictionary.TYPE_APPS)
     }
 
     private fun reload() {

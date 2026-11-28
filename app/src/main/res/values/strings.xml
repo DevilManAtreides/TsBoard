@@ -755,14 +755,12 @@ New dictionary:
     <string name="key_glow_color">Glow color</string>
     <string name="key_glow_color_summary">The opacity bar sets how bright the glow is</string>
     <string name="coding_mode">Coding mode (command suggestions)</string>
-    <string name="coding_mode_summary">For terminal apps like Termux. The keyboard follows the command line you type and suggests commands, subcommands and flags. Replaces the normal word suggestions while it is on, so turn it on only for terminal apps with App profiles. After using the arrow keys, Tab or the up arrow it waits for the next Enter before suggesting again.</string>
-    <string name="terminal_words_dict">Terminal and code words</string>
-    <string name="terminal_words_dict_summary">Suggests shell commands, tools and programming words, predicts the next word after commands like git or pkg, and stops autocorrect from changing them. Use it with App profiles to turn it on only in terminal apps. Termux needs enforce-char-based-input = true in its termux.properties file for suggestions to show.</string>
+    <string name="coding_mode_summary">For terminal apps like Termux. The keyboard follows the command line you type and suggests commands, subcommands and flags. Replaces the normal word suggestions while it is on, so turn it on only for terminal apps: make an App profile for Termux and switch it on there. After using the arrow keys, Tab or the up arrow it waits for the next Enter before suggesting again.</string>
     <string name="live_preview">Live preview (tap the keys to try animations)</string>
     <string name="live_preview_hide">Hide</string>
     <string name="live_preview_show">Show</string>
     <string name="settings_screen_profiles">App profiles</string>
-    <string name="settings_screen_profiles_summary">A different look, layout and settings for each app</string>
+    <string name="settings_screen_coding">Coding</string>
     <string name="profiles_intro">A profile changes any settings you like while you type in the apps you give it. Everything else stays as in your normal settings.</string>
     <string name="profile_no_apps">No apps yet</string>
     <string name="profile_apps_count">%1$d apps</string>

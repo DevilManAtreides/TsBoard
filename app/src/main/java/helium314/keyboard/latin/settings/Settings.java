@@ -169,7 +169,6 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
     public static final String PREF_SHOW_SETUP_WIZARD_ICON = "show_setup_wizard_icon";
     public static final String PREF_USE_CONTACTS = "use_contacts";
     public static final String PREF_USE_APPS = "use_apps";
-    public static final String PREF_TERMINAL_WORDS = "terminal_words";
     public static final String PREF_CODING_MODE = "coding_mode";
     public static final String PREFS_LONG_PRESS_SYMBOLS_FOR_NUMPAD = "long_press_symbols_for_numpad";
 
@@ -549,11 +548,6 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
 
     public static File getCustomBackgroundFile(final Context context, final boolean night, final boolean landscape) {
         return new File(DeviceProtectedUtils.getFilesDir(context), "custom_background_image" + (landscape ? "_landscape" : "") + (night ? "_night" : ""));
-    }
-
-    /** whether the terminal and code words are on, which also allows suggestions in terminal apps */
-    public boolean isTerminalWordsEnabled() {
-        return mPrefs != null && mPrefs.getBoolean(PREF_TERMINAL_WORDS, Defaults.PREF_TERMINAL_WORDS);
     }
 
     public static void clearCachedBackgroundImages() {

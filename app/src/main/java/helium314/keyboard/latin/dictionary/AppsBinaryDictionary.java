@@ -73,24 +73,6 @@ public class AppsBinaryDictionary extends ExpandableBinaryDictionary {
                 addNameLocked(name, FREQUENCY_FOR_APPS, FREQUENCY_FOR_APPS_BIGRAM);
             }
         }
-        if (prefs.getBoolean(Settings.PREF_TERMINAL_WORDS, Defaults.PREF_TERMINAL_WORDS)) {
-            loadTerminalWordsLocked();
-        }
-    }
-
-    /** Loads the bundled shell command, tool and programming words, one phrase per line. */
-    private void loadTerminalWordsLocked() {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-                mContext.getResources().openRawResource(R.raw.terminal_words), StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                line = line.trim();
-                if (line.isEmpty() || line.startsWith("#")) continue;
-                addNameLocked(line, FREQUENCY_FOR_TERMINAL, FREQUENCY_FOR_TERMINAL_BIGRAM);
-            }
-        } catch (IOException e) {
-            Log.e(TAG, "Could not read terminal words", e);
-        }
     }
 
     /**
