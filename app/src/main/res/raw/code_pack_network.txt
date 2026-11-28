@@ -1,0 +1,24 @@
+# TsBoard coding pack. Each line: a command (or command and subcommand), a colon, and what usually follows (subcommands first, then flags).
+curl: -L -s -S -o -O -X -H -d -F -I -i -v -k -u -A -e -b -c -f -fsSL -sL --data --header --output --silent --insecure --compressed --retry --connect-timeout --max-time --location --request --user-agent --cookie --head --include --fail --progress-bar -T --upload-file
+wget: -O -c -q -P -r -np -nc -b -i -U --no-check-certificate --header --mirror --tries --timeout --spider -nv
+ssh: -p -i -L -R -D -N -f -v -X -A -o -J -T -t -q -C -l
+ping: -c -i -W -s -4 -6 -q
+adb: devices shell install uninstall push pull logcat connect disconnect pair reboot tcpip forward reverse -s -d -e kill-server start-server
+rsync: -avz -av -a -v -z -r -P -n -u --progress --delete --exclude --include -e --dry-run --partial --stats -h
+scp: -r -P -i -C -p -q -v
+sftp: -P -i -o
+ssh-keygen: -t -b -C -f -N -p -l -R -y ed25519 rsa
+ssh-copy-id: -i -p
+nc: -l -v -z -w -p -u -k -n
+nmap: -sV -sS -sn -p -p- -A -O -T4 -Pn -v -oN -oX --script
+ip: a addr link route neigh -4 -6 -s -c
+ifconfig: -a
+netstat: -tulpn -an -r -l -p -t -u
+ss: -tulpn -l -t -u -n -p
+dig: +short -x @ +trace ANY MX TXT NS
+nslookup: -type=
+traceroute: -n -m -w
+host: -t -a
+whois: 
+openssl: -in -out -days -newkey -keyout -x509 -nodes -text -noout -subj
+fastboot: devices flash reboot oem unlock getvar

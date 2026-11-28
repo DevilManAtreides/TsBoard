@@ -1,0 +1,51 @@
+# TsBoard coding pack. Each line: a command (or command and subcommand), a colon, and what usually follows (subcommands first, then flags).
+python: -m -c -V -u -i -O -B -W -q --version --help
+python3: -m -c -V -u -i -O -B -W -q --version --help
+node: -e -p -v -r -i --version --inspect --check --watch
+cargo: new init build run test check clean update add remove install uninstall search publish doc fmt clippy bench tree
+go: run build test mod get install fmt vet clean version env generate -v -o -race -ldflags -tags
+make: -j -C -f -n -B -k -s clean install all test
+jq: . -r -c -e -s -n -S --arg --argjson -M .[] .[0] keys length
+yq: -r -i -P
+strace: -f -p -o -e -c
+cmake: -S -B -D -G --build --install -DCMAKE_BUILD_TYPE=Release -DCMAKE_BUILD_TYPE=Debug ..
+ninja: -C -j -v -t
+gcc: -o -c -O2 -O3 -Wall -Wextra -g -std=c11 -std=c99 -I -L -l -lm -lpthread -shared -fPIC -D -E -S -pthread
+g++: -o -c -O2 -O3 -Wall -Wextra -g -std=c++17 -std=c++20 -I -L -l -shared -fPIC -D -pthread
+clang: -o -c -O2 -Wall -g -std=c11 -I -L -l
+clang++: -o -c -O2 -Wall -g -std=c++17 -I -L -l
+gdb: -q -ex -x --args -p
+valgrind: --leak-check=full --show-leak-kinds=all --track-origins=yes -v
+deno: run test fmt lint check install --allow-all -A --allow-net --allow-read --allow-write --watch
+bun: run install add remove x dev build test init create --watch
+ruby: -e -v
+perl: -e -n -p -i -l -a -w -v -M
+php: -r -S -v -m -i -l -a
+lua: -e -v -i
+java: -jar -cp -version -Xmx -Xms -D
+javac: -d -cp -version -source -target
+kotlinc: -d -cp -include-runtime
+rustc: -O -o --edition --crate-type --emit -C -L -g
+tsc: --init --watch -p --noEmit --outDir --target --strict
+eslint: --fix .
+prettier: --write --check .
+vite: build dev preview --host --port
+pytest: -v -vv -x -s -k -q --tb=short --lf --ff -n --cov --maxfail
+black: --check --diff -l
+ruff: check format --fix --watch
+flake8: --max-line-length --ignore
+mypy: --strict --ignore-missing-imports
+sqlite3: -header -column -csv -json -cmd -init
+psql: -h -p -U -d -c -f -l
+mysql: -u -p -h -P -e -D
+redis-cli: -h -p -a --scan PING keys get set
+mongosh: --host --port
+cargo build: --release -p --all-targets --target --features --all-features -v
+cargo run: --release -p --bin --example
+cargo test: --release -p --lib --doc --nocapture --test-threads=1
+cargo new: --bin --lib --vcs
+cargo add: --features --dev --build --optional
+cargo install: --path --force --locked --git --version
+cargo clippy: --all-targets -D warnings --fix
+cargo fmt: --check --all
+cargo doc: --open --no-deps

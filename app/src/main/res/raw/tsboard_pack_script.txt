@@ -1,0 +1,82 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# tsboard-pack: makes completion packs for TsBoard's coding mode.
+#   --install   install the command and the shell hook, then make packs for everything that is installed
+#   --all       make the packs for every command again
+#   --new       make packs only for commands that have none yet (the hook runs this by itself)
+#   <command>   make the pack for one command, for example: tsboard-pack ffmpeg
+PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
+BIN="$PREFIX/bin"
+CONF="$HOME/.config/tsboard-pack"
+SELF="$(readlink -f "$0" 2>/dev/null || echo "$0")"
+
+if [ "$1" = "--install" ]; then
+  mkdir -p "$CONF"
+  dirname "$SELF" > "$CONF/dir"
+  cp "$SELF" "$BIN/tsboard-pack" && chmod +x "$BIN/tsboard-pack"
+  if ! grep -q "__tsboard_pack_check" "$HOME/.bashrc" 2>/dev/null; then
+    cat >> "$HOME/.bashrc" <<'HOOK'
+# TsBoard: make packs for newly installed commands
+__tsboard_pack_check() {
+  local m; m=$(stat -c %Y "$PREFIX/bin" 2>/dev/null)
+  if [ -n "$__TSB_M" ] && [ "$m" != "$__TSB_M" ]; then (tsboard-pack --new >/dev/null 2>&1 &); fi
+  __TSB_M=$m
+}
+PROMPT_COMMAND="__tsboard_pack_check${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
+HOOK
+  fi
+  echo "Installed. Making packs for everything that is installed, this takes a few minutes..."
+  exec "$BIN/tsboard-pack" --all
+fi
+
+DIR="$(cat "$CONF/dir" 2>/dev/null)"
+[ -z "$DIR" ] && DIR="$(dirname "$SELF")"
+if [ ! -d "$DIR" ] || [ ! -w "$DIR" ]; then
+  echo "Can't write to $DIR. Run termux-setup-storage first, and check that the folder exists."
+  exit 1
+fi
+
+# commands that should only be listed by name: they would start something instead of printing help
+SKIP='^(sh|bash|dash|zsh|fish|login|su|tsu|reset|clear|top|htop|btop|vi|vim|nvim|nano|less|more|man|watch|tmux|screen|ssh|sshd|mosh|emacs|cat|tail|read|yes|nc|ncat|socat|am|pm|cmd|logcat|reboot|tsboard-pack|termux-.*)$'
+
+flags_of() { # reads help text, prints the flags in it
+  grep -oE '(^|[[:space:],|=(\[])(-[A-Za-z0-9]|--[A-Za-z][A-Za-z0-9-]+)' | sed -E 's/^[^-]*//' | sort -u
+}
+
+make_pack() {
+  local c="$1" tmp help subs flags s sf
+  [[ "$c" =~ ^[A-Za-z0-9][A-Za-z0-9._+-]{1,40}$ ]] || return
+  tmp="$(mktemp)"
+  if [[ "$c" =~ $SKIP ]]; then
+    echo "$c:" > "$tmp"
+  else
+    help="$(timeout 3 "$c" --help </dev/null 2>&1 | head -400)"
+    [ -z "$help" ] && help="$(timeout 3 "$c" -h </dev/null 2>&1 | head -400)"
+    subs="$(echo "$help" | awk '/[Cc]ommands?:?[[:space:]]*$/ {on=1; next} on && /^[A-Za-z]/ {on=0} on && /^[[:space:]]{2,6}[a-z][a-z0-9-]+([[:space:]]{2,}|$)/ {print $1; n++} n>=40 {exit}' | sort -u)"
+    flags="$(echo "$help" | flags_of | head -80)"
+    echo "$c: $(echo $subs $flags)" > "$tmp"
+    for s in $(echo "$subs" | head -25); do
+      sf="$(timeout 3 "$c" "$s" --help </dev/null 2>&1 | head -200 | flags_of | head -60)"
+      [ -n "$sf" ] && echo "$c $s: $(echo $sf)" >> "$tmp"
+    done
+  fi
+  cp "$tmp" "$DIR/$c.txt"
+  rm -f "$tmp"
+}
+export -f make_pack flags_of
+export DIR SKIP
+
+case "$1" in
+  --all)
+    ls "$BIN" | xargs -P 4 -I{} bash -c 'make_pack {}'
+    echo "Done: $(ls "$DIR"/*.txt 2>/dev/null | wc -l) packs in $DIR"
+    ;;
+  --new|"")
+    for c in $(ls "$BIN"); do
+      [ -f "$DIR/$c.txt" ] || echo "$c"
+    done | xargs -P 4 -I{} bash -c 'make_pack {}'
+    ;;
+  *)
+    make_pack "$1"
+    echo "Pack for $1 written to $DIR/$1.txt"
+    ;;
+esac

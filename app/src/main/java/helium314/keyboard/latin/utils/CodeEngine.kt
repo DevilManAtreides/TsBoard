@@ -7,7 +7,6 @@ import androidx.core.content.edit
 import helium314.keyboard.event.Event
 import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
 import helium314.keyboard.latin.InputStyle
-import helium314.keyboard.latin.R
 import helium314.keyboard.latin.dictionary.Dictionary
 import helium314.keyboard.latin.suggestions.SuggestedWordInfo
 import helium314.keyboard.latin.suggestions.SuggestedWords
@@ -36,11 +35,11 @@ object CodeEngine {
     private var partialLength = 0
     private var lastInfos: List<SuggestedWordInfo> = emptyList()
     private var appContext: Context? = null
-    private var db: Map<String, List<String>>? = null
     private var usage: MutableMap<String, Int>? = null
 
     fun init(context: Context) {
         appContext = context.applicationContext
+        CodePacks.refreshAsync(context)
     }
 
     /** a new text field: start with an empty line */
@@ -220,21 +219,16 @@ object CodeEngine {
 
     // ---------- data ----------
 
+    @Volatile private var db: Map<String, List<String>>? = null
+
+    /** used when the packs are read (also when something changed in the packs) */
+    fun setDatabase(map: Map<String, List<String>>) {
+        db = map
+    }
+
     private fun database(): Map<String, List<String>> {
         db?.let { return it }
-        val map = LinkedHashMap<String, List<String>>()
-        try {
-            appContext?.resources?.openRawResource(R.raw.code_commands)?.bufferedReader()?.useLines { lines ->
-                lines.forEach { raw ->
-                    if (raw.isBlank() || raw.startsWith("#")) return@forEach
-                    val colon = raw.indexOf(':')
-                    if (colon <= 0) return@forEach
-                    map[raw.substring(0, colon).trim()] = raw.substring(colon + 1).trim().split(" ").filter { it.isNotEmpty() }
-                }
-            }
-        } catch (e: Exception) {
-            Log.e("CodeEngine", "could not read the command list", e)
-        }
+        val map = appContext?.let { CodePacks.loadBuiltin(it) } ?: emptyMap() // the others are added when they are read
         db = map
         return map
     }

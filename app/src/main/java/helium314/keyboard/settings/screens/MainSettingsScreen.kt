@@ -125,7 +125,7 @@ fun MainSettingsScreen(
                 Preference(
                     name = stringResource(R.string.settings_screen_coding),
                     onClick = onClickCoding,
-                    icon = R.drawable.ic_settings_advanced,
+                    icon = R.drawable.ic_settings_coding,
                     iconColor = Color(0xFF06B6D4)
                 ) { NextScreenIcon() }
                 Preference(

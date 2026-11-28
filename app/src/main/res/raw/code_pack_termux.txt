@@ -1,0 +1,26 @@
+# TsBoard coding pack. Each line: a command (or command and subcommand), a colon, and what usually follows (subcommands first, then flags).
+termux-setup-storage: 
+termux-reload-settings: 
+termux-info: 
+termux-change-repo: 
+termux-open: --send --view
+termux-open-url: 
+termux-clipboard-get: 
+termux-clipboard-set: 
+termux-notification: -t -c --id --title --content --action --button1
+termux-toast: -b -c -g -s
+termux-vibrate: -d -f
+termux-battery-status: 
+termux-wifi-connectioninfo: 
+termux-wifi-scaninfo: 
+termux-location: -p -r
+termux-camera-photo: -c
+termux-tts-speak: -l -r -p
+termux-share: -a -c -d
+termux-wake-lock: 
+termux-wake-unlock: 
+termux-fix-shebang: 
+termux-backup: 
+termux-restore: 
+proot: -0 -b -r -w -S
+proot-distro: install login list remove reset backup restore rename --shared-tmp --user

@@ -1,0 +1,43 @@
+# TsBoard coding pack. Each line: a command (or command and subcommand), a colon, and what usually follows (subcommands first, then flags).
+pkg: install update upgrade search remove uninstall list-installed list-all show files reinstall autoclean clean edit-sources
+apt: install update upgrade search remove purge list show autoremove full-upgrade edit-sources
+pip: install uninstall list freeze show search download check
+pip3: install uninstall list freeze show search download check
+npm: install uninstall update init run start test build publish ci link ls outdated audit cache config login version pack exec
+rustup: update default toolchain component target show install self
+gem: install uninstall update list search build push
+bundle: install update exec init add
+pipx: install uninstall list run upgrade ensurepath
+npx: -y --yes -p create-react-app create-next-app vite
+yarn: add remove install init run build start test upgrade global dlx
+pnpm: add remove install init run build start test update dlx exec
+uv: pip run init add remove sync venv lock tool python
+poetry: new init install add remove update run shell build publish lock
+dpkg: -i -l -L -S -r -P -s --configure
+brew: install update upgrade search list
+pkg install: -y
+pkg upgrade: -y
+pkg update: 
+pkg search: 
+pkg remove: -y
+pkg list-installed: 
+npm install: -g -D --save-dev --save --save-exact --legacy-peer-deps --no-save --force --production --ignore-scripts
+npm run: build dev start test lint watch serve --silent
+npm init: -y
+npm update: -g
+npm uninstall: -g
+npm ls: -g --depth=0
+npm audit: fix --force
+npm publish: --access --tag --dry-run
+npm cache: clean --force verify
+npm config: set get list delete
+pip install: -r -U --upgrade -e --user --no-cache-dir --break-system-packages --force-reinstall --pre -q --no-deps -i --index-url --target
+pip uninstall: -y -r
+pip list: --outdated -o --format=freeze
+pip freeze: requirements.txt
+pip show: -f
+apt install: -y --no-install-recommends --reinstall
+apt update: 
+apt upgrade: -y
+apt remove: -y --purge
+apt search: 

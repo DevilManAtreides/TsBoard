@@ -1,0 +1,8 @@
+# TsBoard coding pack. Each line: a command (or command and subcommand), a colon, and what usually follows (subcommands first, then flags).
+ffmpeg: -i -c:v -c:a -vf -af -ss -t -to -r -b:v -b:a -y -an -vn -map -f -crf -preset libx264 libx265 aac copy
+yt-dlp: -f -x -o -F -P --audio-format --embed-thumbnail --embed-metadata --write-subs --list-formats -S --cookies --playlist-items --merge-output-format --no-playlist
+ffprobe: -v -show_format -show_streams -print_format
+convert: -resize -quality -rotate -crop -colorspace
+magick: -resize -quality -rotate -crop
+pandoc: -o -f -t -s --toc --pdf-engine
+imagemagick: 

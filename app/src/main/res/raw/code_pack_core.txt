@@ -1,0 +1,155 @@
+# TsBoard coding pack. Each line: a command (or command and subcommand), a colon, and what usually follows (subcommands first, then flags).
+ls: -l -a -la -lh -lah -R -t -S -1 -d -F -r --color --help
+cd: .. - ~ /
+cat: -n -A -s --help
+cp: -r -a -v -i -u -p -f --help
+mv: -v -i -f -n -u --help
+rm: -r -f -rf -v -i -d --help
+mkdir: -p -v -m --help
+grep: -r -i -n -v -E -w -l -c -o -A -B -C -R -F -H -q --color --include --exclude -rn -rni -ri
+find: -name -iname -type -mtime -size -exec -delete -maxdepth -mindepth -print -path -user -perm
+tar: -xzf -czf -xvf -cvf -xf -cf -tf -tzf -xJf -cJf -xjf -cjf -C -v -z -x -c -f --exclude --strip-components
+chmod: -R +x -x 755 644 600 777 u+x a+x +r -v
+nano: -l -w -B -c
+vim: -O -o -p -R -d +
+echo: -n -e
+clear: 
+exit: 
+pwd: 
+sudo: -i -u -s -E -k
+tmux: new -s attach -t ls kill-session -a -d split-window source-file send-keys
+kill: -9 -15 -l -s
+ps: -ef -aux -e -f -u -p
+top: -d -n -p -u
+df: -h -T -a -i
+du: -h -s -sh -a -d -c --max-depth
+ln: -s -sf -f -v
+touch: -a -m -c -t
+sed: -i -e -n -E -r -f -s
+awk: -F -f -v
+sort: -n -r -u -k -t -h
+head: -n -c
+tail: -n -f -F -c
+less: -N -S -R -F
+man: -k -f
+which: -a
+export: PATH= HOME= LANG=
+source: ~/.bashrc ~/.zshrc
+history: -c -w
+unzip: -l -d -o -q -p
+zip: -r -q -e -9 -x
+rmdir: -p -v --help
+chown: -R -v --help
+egrep: -i -n -v -r
+cut: -d -f -c
+uniq: -c -d -u -i
+wc: -l -w -c -m
+tr: -d -s -c
+tee: -a
+xargs: -n -I -P -0 -r
+diff: -u -r -q -y -w -i --color
+free: -h -m -g
+killall: -9 -s -q
+pkill: -9 -f -u
+pgrep: -l -f -a
+nohup: 
+sleep: 1 5 10 60
+date: +%Y-%m-%d +%s -u -d
+alias: -p
+whoami: 
+uname: -a -r -m -n
+uptime: -p
+gzip: -d -k -9 -c -r -v
+gunzip: -k -c
+7z: x a l -o -p
+xz: -d -k -9 -T
+bzip2: -d -k -9
+base64: -d -w
+md5sum: -c
+sha256sum: -c
+sha1sum: -c
+xxd: -r -p -l
+hexdump: -C -n
+strings: -n
+file: -b -i
+stat: -c
+basename: -s
+dirname: 
+realpath: -s
+readlink: -f
+env: -i -u
+printenv: 
+screen: -S -r -ls -d -dmS -X
+more: -d
+watch: -n -d -t
+time: -p
+timeout: -s -k
+yes: 
+seq: -s -w
+shuf: -n -e
+bc: -l
+tree: -L -a -d -h -I -C -f --du
+lsof: -i -p -u -t -n -P
+nproc: --all
+htop: -u -p
+btop: 
+neofetch: 
+fastfetch: 
+ncdu: -x
+fd: -e -t -H -I -x -d --hidden --no-ignore --extension --type
+rg: -i -n -l -w -F -t -g -A -B -C --hidden --no-ignore --files --type-list -S -uu --glob --stats -c
+bat: -n -p -l -A --style --theme --paging -r
+fzf: -m -e -i --preview --height --reverse --multi --ansi
+eza: -l -a -la -T -R --tree --icons --git --color
+exa: -l -a -la -T --icons --git
+su: -
+zsh: -c -i -l
+bash: -c -i -l -x -n --norc
+sh: -c -x -e
+chsh: -s
+passwd: 
+useradd: -m -s -G
+groups: 
+id: -u -g -n
+mount: -t -o -a
+umount: -l -f
+dd: if= of= bs= count= status=progress conv=
+mkfs: -t
+lsblk: -f -a
+fdisk: -l
+rename: -n -v
+split: -b -l -d
+column: -t -s
+paste: -d -s
+comm: -12 -13 -23
+join: -t -1 -2
+nl: -ba
+rev: 
+fold: -w -s
+expand: -t
+iconv: -f -t -c
+dos2unix: -n
+unix2dos: 
+od: -A -t -c
+cmp: -l -s
+patch: -p1 -R -i --dry-run
+envsubst: 
+getopts: 
+trap: EXIT INT TERM ERR
+read: -r -p -s -a -t
+printf: 
+test: -f -d -e -r -w -x -z -n
+type: -a -t
+ulimit: -a -n -s
+set: -e -u -x -o pipefail
+unset: -v -f
+wait: -n
+disown: -h -a
+jobs: -l
+fg: %1
+bg: %1
+tmux new: -s -d -A -n
+tmux attach: -t -d
+tmux kill-session: -t -a
+tmux ls: 
+tmux split-window: -h -v -c

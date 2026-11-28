@@ -1,0 +1,44 @@
+# TsBoard coding pack. Each line: a command (or command and subcommand), a colon, and what usually follows (subcommands first, then flags).
+docker: run ps images build pull push exec logs stop start rm rmi compose network volume system inspect cp tag login
+podman: run ps images build pull push exec logs stop start rm rmi
+kubectl: get apply delete describe logs exec port-forward config rollout scale create edit -n -f -o
+helm: install upgrade uninstall list repo search template
+terraform: init plan apply destroy validate fmt output state
+ansible: -i -m -a -b -K
+systemctl: start stop restart status enable disable reload daemon-reload list-units --user
+journalctl: -u -f -n -b -e -x -p --since --until --no-pager
+crontab: -e -l -r
+service: start stop restart status
+docker run: -it -d --rm -p -v -e --name --network -w --restart --privileged -u --entrypoint -i -t --env-file --platform
+docker ps: -a -q -l --format
+docker images: -a -q --format
+docker build: -t -f --no-cache --build-arg --target --platform .
+docker exec: -it -u -w -e
+docker logs: -f --tail --since -t
+docker compose: up down build ps logs restart stop start pull exec run config -d -f --build --force-recreate -v --remove-orphans
+docker system: prune df info -a -f
+docker network: ls create rm inspect connect
+docker volume: ls create rm inspect prune
+docker rm: -f -v
+docker rmi: -f
+docker stop: 
+docker pull: --platform -a
+docker push: 
+docker cp: -a
+docker inspect: --format
+docker tag: 
+docker login: -u -p
+systemctl status: --no-pager -l
+systemctl enable: --now
+systemctl disable: --now
+systemctl start: 
+systemctl stop: 
+systemctl restart: 
+kubectl get: pods svc deployments nodes ns all ingress configmap secret -o wide -n -A --all-namespaces -w yaml json name
+kubectl apply: -f -k --dry-run=client
+kubectl delete: -f pod svc deployment -n --all --force
+kubectl describe: pod svc node deployment -n
+kubectl logs: -f --tail -c -n --previous
+kubectl exec: -it -n -c
+kubectl config: get-contexts use-context current-context view set-context
+kubectl rollout: status restart undo history

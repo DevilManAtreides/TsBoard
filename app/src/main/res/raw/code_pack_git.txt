@@ -1,0 +1,40 @@
+# TsBoard coding pack. Each line: a command (or command and subcommand), a colon, and what usually follows (subcommands first, then flags).
+git: init clone add commit push pull fetch merge rebase checkout switch branch status log diff stash reset restore remote tag show config clean cherry-pick revert bisect blame submodule worktree reflog grep mv rm describe shortlog archive gc fsck apply am format-patch bundle
+gh: repo pr issue auth gist release workflow run api browse clone create view list checkout merge
+git init: -b --bare
+git clone: --depth --recursive -b --single-branch --branch --shallow-submodules --filter=blob:none --bare --mirror
+git add: . -A -p -u -f -n -N --all --patch --intent-to-add
+git commit: -m -a -am -v --amend --no-edit --allow-empty -S --no-verify --fixup --squash -F --author --date
+git push: -u origin main master --force --force-with-lease --tags --delete -f --all --set-upstream --dry-run --no-verify
+git pull: --rebase --ff-only --no-rebase origin main master --autostash -p
+git fetch: --all --prune --tags origin upstream -p --depth --unshallow
+git merge: --no-ff --squash --abort --continue --ff-only -m --no-commit
+git rebase: -i --abort --continue --skip --onto --autosquash --root --interactive main master
+git checkout: -b -B . -f --orphan --track -t main master
+git switch: -c -C - --detach main master
+git branch: -a -d -D -m -M -r -v -vv --list --merged --no-merged --show-current --set-upstream-to --unset-upstream
+git status: -s -sb -b --short --branch --porcelain --ignored -uno
+git log: --oneline --graph --all --decorate -p -n --stat --since --until --author --grep --pretty=format --follow --name-only --name-status --abbrev-commit -S --merges --no-merges --first-parent
+git diff: --staged --cached --stat --name-only --name-status HEAD HEAD~1 -w --color-words --check --shortstat main origin/main
+git stash: push pop apply list drop clear show -u -m branch --keep-index --include-untracked
+git reset: --hard --soft --mixed HEAD HEAD~1 HEAD~2 --keep
+git restore: --staged --source -p --worktree .
+git remote: add remove rename show -v set-url get-url prune update origin upstream
+git tag: -a -d -l -m -f -s -n -v --list --delete --sort
+git show: --stat --name-only -s --pretty=fuller HEAD
+git config: --global --local --system --list -l --unset --get -e user.name user.email core.editor pull.rebase init.defaultBranch alias. credential.helper --add
+git clean: -f -fd -fdx -n -d -x -i
+git cherry-pick: -x -n --continue --abort --skip -e --no-commit
+git revert: --no-edit -n --abort --continue -m
+git bisect: start bad good reset run skip log visualize
+git blame: -L -w -C -e --since
+git submodule: add update init status sync foreach deinit --init --recursive --remote
+git worktree: add list remove prune move lock unlock
+git reflog: show expire delete --all
+git grep: -n -i -w -c -l -e --untracked -p -E -F
+gh pr: create list view checkout merge close status diff review
+gh repo: create clone view fork list delete
+gh issue: create list view close
+gh auth: login logout status refresh
+gh release: create list view download
+gh run: list view watch

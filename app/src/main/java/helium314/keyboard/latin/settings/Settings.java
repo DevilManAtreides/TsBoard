@@ -170,6 +170,9 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
     public static final String PREF_USE_CONTACTS = "use_contacts";
     public static final String PREF_USE_APPS = "use_apps";
     public static final String PREF_CODING_MODE = "coding_mode";
+    // only names for the settings screen, the packs have their own storage
+    public static final String PREF_CODING_PACKS = "coding_packs";
+    public static final String PREF_CODING_FOLDER = "coding_folder";
     public static final String PREFS_LONG_PRESS_SYMBOLS_FOR_NUMPAD = "long_press_symbols_for_numpad";
 
     public static final String PREF_ONE_HANDED_MODE_PREFIX = "one_handed_mode_enabled";
