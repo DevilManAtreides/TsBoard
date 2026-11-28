@@ -46,6 +46,7 @@ import helium314.keyboard.latin.utils.previewDark
 import androidx.core.content.edit
 import helium314.keyboard.keyboard.internal.PopupKeySpec
 import helium314.keyboard.settings.preferences.SliderPreference
+import helium314.keyboard.settings.preferences.TerminalCompletionsPref
 import helium314.keyboard.settings.preferences.TextInputPreference
 
 @Composable
@@ -95,6 +96,8 @@ fun TextCorrectionScreen(
         Settings.PREF_USE_CONTACTS,
         Settings.PREF_USE_APPS,
         Settings.PREF_TERMINAL_WORDS,
+        Settings.PREF_TERMINAL_ONLY,
+        Settings.PREF_TERMINAL_IMPORT_URI,
         if (prefs.getBoolean(Settings.PREF_KEY_USE_PERSONALIZED_DICTS, Defaults.PREF_KEY_USE_PERSONALIZED_DICTS))
             Settings.PREF_ADD_TO_PERSONAL_DICTIONARY else null,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
@@ -274,6 +277,16 @@ fun createCorrectionSettings(context: Context) = listOf(
         R.string.terminal_words_dict, R.string.terminal_words_dict_summary
     ) { setting ->
         SwitchPreference(setting, Defaults.PREF_TERMINAL_WORDS) { ExpandableDictionaryUtils.setNeedsUpdate(Dictionary.TYPE_APPS) }
+    },
+    Setting(context, Settings.PREF_TERMINAL_ONLY,
+        R.string.terminal_only, R.string.terminal_only_summary
+    ) { setting ->
+        SwitchPreference(setting, Defaults.PREF_TERMINAL_ONLY)
+    },
+    Setting(context, Settings.PREF_TERMINAL_IMPORT_URI,
+        R.string.terminal_import, R.string.terminal_import_summary
+    ) { setting ->
+        TerminalCompletionsPref(setting)
     },
     Setting(
         context, Settings.PREF_SUGGEST_EMOJIS, R.string.suggest_emojis, R.string.suggest_emojis_summary

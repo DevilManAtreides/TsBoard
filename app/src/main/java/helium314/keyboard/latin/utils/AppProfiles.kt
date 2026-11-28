@@ -236,6 +236,8 @@ object AppProfiles {
         || key == Settings.PREF_RECENT_EMOJIS
         || key == Settings.PREF_DONT_SHOW_MISSING_DICTIONARY_DIALOG
         || key == Settings.PREF_VERSION_CODE
+        || key == Settings.PREF_TERMINAL_IMPORT_URI
+        || key == Settings.PREF_TERMINAL_IMPORT_MODIFIED
 
     private fun parse(text: String?): JSONObject = try {
         JSONObject(text ?: "{}")

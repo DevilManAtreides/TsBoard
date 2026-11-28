@@ -539,7 +539,9 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
     ): List<SuggestedWordInfo> {
         val suggestions = ArrayList<SuggestedWordInfo>()
         val weightForLocale = dictGroup.getWeightForLocale(dictionaryGroups, composedData.mIsBatchMode)
+        val codeOnly = Settings.getValues()?.mTerminalCodeOnly == true
         for (dictType in DictionaryFacilitator.ALL_DICTIONARY_TYPES) {
+            if (codeOnly && dictType != Dictionary.TYPE_APPS) continue // terminal: only code words
             val dictionary = dictGroup.getDict(dictType) ?: continue
             val dictionarySuggestions = dictionary.getSuggestions(composedData, ngramContext, proximityInfoHandle,
                 settingsValuesForSuggestion, sessionId, weightForLocale, weightOfLangModelVsSpatialModel
