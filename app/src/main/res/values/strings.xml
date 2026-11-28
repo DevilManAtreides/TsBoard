@@ -1460,4 +1460,11 @@ New dictionary:
     <string name="background_dim_summary">Darkens the background image so keys stay readable</string>
     <string name="background_key_opacity">Key opacity</string>
     <string name="background_key_opacity_summary">Lower values let the background image show through the keys</string>
+    <!-- neural next word prediction -->
+    <string name="neural_prediction">Smart next-word prediction</string>
+    <string name="neural_prediction_summary">Use a language model on this phone for better, grammatical suggestions. Needs a model file (below). Nothing leaves the device.</string>
+    <string name="neural_model">Language model</string>
+    <string name="neural_model_import">Choose files</string>
+    <string name="neural_model_remove">Remove model</string>
+    <string name="neural_model_help">Choose model.onnx and tokenizer.json together (select both in the file picker). Create them with tools/make-lm-model.py. Without a model the normal suggestions are used.</string>
 </resources>

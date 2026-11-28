@@ -775,6 +775,7 @@ public class LatinIME extends InputMethodService implements
 
     void onStartInputViewInternal(EditorInfo editorInfo, boolean restarting) {
         CodeEngine.INSTANCE.init(this);
+        helium314.keyboard.latin.utils.neural.NeuralPredictor.INSTANCE.prepare(this);
         if (!restarting) CodeEngine.INSTANCE.reset();
         super.onStartInputView(editorInfo, restarting);
 

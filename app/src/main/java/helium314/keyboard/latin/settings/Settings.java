@@ -167,6 +167,8 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
     public static final String PREF_GESTURE_FAST_TYPING_COOLDOWN = "gesture_fast_typing_cooldown";
     public static final String PREF_GESTURE_TRAIL_FADEOUT_DURATION = "gesture_trail_fadeout_duration";
     public static final String PREF_SHOW_SETUP_WIZARD_ICON = "show_setup_wizard_icon";
+    public static final String PREF_NEURAL_PREDICTION = "neural_prediction";
+    public static final String PREF_NEURAL_MODEL = "neural_model"; // screen key only
     public static final String PREF_USE_CONTACTS = "use_contacts";
     public static final String PREF_USE_APPS = "use_apps";
     public static final String PREF_CODING_MODE = "coding_mode";

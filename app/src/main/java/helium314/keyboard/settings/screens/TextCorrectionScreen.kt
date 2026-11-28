@@ -88,6 +88,8 @@ fun TextCorrectionScreen(
         if (suggestionsEnabled || autocorrectEnabled) Settings.PREF_INLINE_EMOJI_SEARCH else null,
         Settings.PREF_KEY_USE_PERSONALIZED_DICTS,
         Settings.PREF_BIGRAM_PREDICTIONS,
+        Settings.PREF_NEURAL_PREDICTION,
+        if (prefs.getBoolean(Settings.PREF_NEURAL_PREDICTION, Defaults.PREF_NEURAL_PREDICTION)) Settings.PREF_NEURAL_MODEL else null,
         Settings.PREF_SUGGEST_PUNCTUATION,
         if (prefs.getBoolean(Settings.PREF_SUGGEST_PUNCTUATION, Defaults.PREF_SUGGEST_PUNCTUATION))
             Settings.PREF_PUNCTUATION_SUGGESTIONS else null,
@@ -107,6 +109,16 @@ fun TextCorrectionScreen(
 }
 
 fun createCorrectionSettings(context: Context) = listOf(
+    Setting(context, Settings.PREF_NEURAL_PREDICTION,
+        R.string.neural_prediction, R.string.neural_prediction_summary
+    ) { setting ->
+        SwitchPreference(setting, Defaults.PREF_NEURAL_PREDICTION) {
+            if (it) helium314.keyboard.latin.utils.neural.NeuralPredictor.prepare(context)
+        }
+    },
+    Setting(context, Settings.PREF_NEURAL_MODEL, R.string.neural_model) { setting ->
+        helium314.keyboard.settings.preferences.NeuralModelPref(setting)
+    },
     Setting(context, SettingsWithoutKey.EDIT_PERSONAL_DICTIONARY, R.string.edit_personal_dictionary) {
         Preference(
             name = stringResource(R.string.edit_personal_dictionary),

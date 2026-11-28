@@ -72,6 +72,7 @@ import helium314.keyboard.latin.utils.RecapitalizeStatus;
 import helium314.keyboard.latin.utils.ScriptUtils;
 import helium314.keyboard.latin.utils.StatsUtils;
 import helium314.keyboard.latin.utils.TextAtCursor;
+import helium314.keyboard.latin.utils.neural.NeuralPredictor;
 import helium314.keyboard.latin.utils.TextPlacement;
 import helium314.keyboard.latin.utils.TimestampKt;
 
@@ -2519,6 +2520,13 @@ public final class InputLogic {
                     settingsValues.mSettingsValuesForSuggestion,
                     settingsValues.mAutoCorrectEnabled,
                     inputStyle, sequenceNumber);
+            if (textAtCursor != null) {
+                // optional language model: better next words, better order of corrections
+                final String typedNow = mWordComposer.isComposingWord() ? mWordComposer.getTypedWord() : "";
+                String before = textAtCursor.getText().subSequence(0, Math.min(textAtCursor.getCursorPosition(), textAtCursor.getText().length())).toString();
+                if (!typedNow.isEmpty() && before.endsWith(typedNow)) before = before.substring(0, before.length() - typedNow.length());
+                suggestedWords = NeuralPredictor.INSTANCE.improve(mLatinIME, suggestedWords, before, typedNow, mDictionaryFacilitator);
+            }
             callback.onGetSuggestedWords(suggestedWords);
         } catch (Exception e) {
             // better go without suggestions than have the keyboard crash
